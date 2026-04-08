@@ -16,7 +16,13 @@ The project uses Sentinel-1 GRD data from Google Earth Engine. Sentinel-1 is a S
 
 ### Methodology
 
-The workflow begins by defining the study area and filtering Sentinel-1 images by location, date, instrument mode, and polarisation. A composite image is generated as an initial preprocessing step. The processed data will then be used to identify spatial patterns of maritime activity and support further hotspot and temporal analysis in the application.
+The preprocessing workflow begins by defining the study area (AOI) for the Port of Singapore and surrounding waters in Google Earth Engine. Sentinel-1 GRD imagery was filtered by location, date range, instrument mode (IW), and polarisation (VV and VH). A median composite image was generated as an initial preprocessing output for data inspection and further analysis.
+
+To evaluate temporal data availability, monthly image counts were also calculated for 2023. The results show relatively stable Sentinel-1 coverage throughout the year, indicating that the dataset is suitable for subsequent monthly or seasonal analysis. The preprocessing script is included in the project repository for reproducibility.
+
+![](images/monthly_image_count.png)
+
+Figure: Monthly Sentinel-1 image count in the study area for 2023.
 
 ### Interface
 
@@ -24,10 +30,6 @@ The interface is intended to support interactive exploration of maritime activit
 
 ## The Application
 
-Replace the link below with the link to your application.
-
-::: {.column-page}
-<iframe src="https://YOUR-APP-LINK-HERE" width="100%" height="700px"></iframe>
-:::
+The interactive application is currently under development and will be embedded here once the final Google Earth Engine application is published. At this stage, the website presents the project background, study area, dataset, and preprocessing workflow.
 
 
