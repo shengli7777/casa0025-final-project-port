@@ -1,55 +1,33 @@
-# CASA00025 Group Project Title Here
+# Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1
 
-## Project Summary 
+## Project Summary
 
-Fill in the sections below to provide a brief summary of your project. Each section should have no more than 100 words. Do not edit any of the headings.
+### Problem Statement
 
-### Problem Statement 
+This project addresses the challenge of understanding maritime activity patterns in the Port of Singapore using remotely sensed data. As one of the busiest port regions in the world, Singapore experiences dense ship traffic and complex spatial use across port zones, anchorage areas, and shipping lanes. Our application aims to provide an interactive way to explore these spatial patterns using satellite radar imagery.
 
-What is the problem you’re trying to address using this application? 
+### End User
 
-### End User 
-
-Who are you building this application for? How does it address a need this community has?
+This application is designed for students, researchers, and users interested in maritime monitoring and spatial analysis. It helps users explore how satellite imagery can reveal activity patterns in port environments and supports better understanding of how maritime space is used in a globally significant shipping hub.
 
 ### Data
 
-What data are you using? 
+The project uses Sentinel-1 GRD data from Google Earth Engine. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.
 
 ### Methodology
 
-How are you using this data to address the problem?
+The workflow begins by defining the study area and filtering Sentinel-1 images by location, date, instrument mode, and polarisation. A composite image is generated as an initial preprocessing step. The processed data will then be used to identify spatial patterns of maritime activity and support further hotspot and temporal analysis in the application.
 
 ### Interface
 
-How does your application's interface work to address the needs of your end user?
+The interface is intended to support interactive exploration of maritime activity in the study area. Users will be able to view spatial outputs on a map and explore patterns in different parts of the port region. Additional interface components will be developed to improve navigation, data interpretation, and comparison of activity patterns.
 
-## The Application 
+## The Application
 
 Replace the link below with the link to your application.
 
-:::{.column-page}
-
-<iframe src='https://ollielballinger.users.earthengine.app/view/turkey-earthquake' width='100%' height='700px'></iframe>
-
+::: {.column-page}
+<iframe src="https://YOUR-APP-LINK-HERE" width="100%" height="700px"></iframe>
 :::
-## How it Works 
-
-Use this section to explain how your application works using code blocks and text explanations (no more than 500 words excluding code):
-
-```js
-Map.setCenter(35.51898, 33.90153, 15);
-
-Map.setOptions("satellite");
-
-var aoi = ee.Geometry.Point(35.51898, 33.90153).buffer(3000);
-```
-
-You can include images:
-
-![Pixelwise T-Test, 2018](images/beirut_change_2020.jpg)
-
-and math:
-$$ \Large t = {\frac{\overline{x_1}-\overline{x_2}} {\sqrt{\frac{s^2_1}{n_1} + \frac{s^2_2}{n_2}}}} $$
 
 
