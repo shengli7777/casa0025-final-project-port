@@ -1,37 +1,30 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "CASA00025 Group Project Title Here",
-    "section": "",
-    "text": "Fill in the sections below to provide a brief summary of your project. Each section should have no more than 100 words. Do not edit any of the headings.\n\n\nWhat is the problem you’re trying to address using this application?\n\n\n\nWho are you building this application for? How does it address a need this community has?\n\n\n\nWhat data are you using?\n\n\n\nHow are you using this data to address the problem?\n\n\n\nHow does your application’s interface work to address the needs of your end user?\n\n\n\n\nReplace the link below with the link to your application.\n\n\n\n\n\n\n\nUse this section to explain how your application works using code blocks and text explanations (no more than 500 words excluding code):\nMap.setCenter(35.51898, 33.90153, 15);\n\nMap.setOptions(\"satellite\");\n\nvar aoi = ee.Geometry.Point(35.51898, 33.90153).buffer(3000);\nYou can include images:\n\n\n\nPixelwise T-Test, 2018\n\n\nand math: \\[ \\Large t = {\\frac{\\overline{x_1}-\\overline{x_2}} {\\sqrt{\\frac{s^2_1}{n_1} + \\frac{s^2_2}{n_2}}}} \\]"
-  },
-  {
-    "objectID": "index.html#project-summary",
-    "href": "index.html#project-summary",
-    "title": "CASA00025 Group Project Title Here",
-    "section": "",
-    "text": "Fill in the sections below to provide a brief summary of your project. Each section should have no more than 100 words. Do not edit any of the headings.\n\n\nWhat is the problem you’re trying to address using this application?\n\n\n\nWho are you building this application for? How does it address a need this community has?\n\n\n\nWhat data are you using?\n\n\n\nHow are you using this data to address the problem?\n\n\n\nHow does your application’s interface work to address the needs of your end user?"
-  },
-  {
-    "objectID": "index.html#the-application",
-    "href": "index.html#the-application",
-    "title": "CASA00025 Group Project Title Here",
-    "section": "",
-    "text": "Replace the link below with the link to your application."
-  },
-  {
-    "objectID": "index.html#how-it-works",
-    "href": "index.html#how-it-works",
-    "title": "CASA00025 Group Project Title Here",
-    "section": "",
-    "text": "Use this section to explain how your application works using code blocks and text explanations (no more than 500 words excluding code):\nMap.setCenter(35.51898, 33.90153, 15);\n\nMap.setOptions(\"satellite\");\n\nvar aoi = ee.Geometry.Point(35.51898, 33.90153).buffer(3000);\nYou can include images:\n\n\n\nPixelwise T-Test, 2018\n\n\nand math: \\[ \\Large t = {\\frac{\\overline{x_1}-\\overline{x_2}} {\\sqrt{\\frac{s^2_1}{n_1} + \\frac{s^2_2}{n_2}}}} \\]"
-  },
-  {
     "objectID": "readme.html",
     "href": "readme.html",
     "title": "",
     "section": "",
     "text": "Use this repository to host a website for your CASA0025 final project by following these stpes:\n\nclone this repository\ninstall quarto\nedit the ‘index.qmd’ file with the contents of your project\nusing terminal, navigate to the project directory and run “quarto render”\npush the changes to your github repository\non github, navigate to Settings&gt;Pages&gt;Build and Deployment. Make sure that under “Source” it says “deploy from branch”. Under “Branch”, select “Main” in the first dropdown and “Docs” under the second drop down. Then press “Save”\n\nYour website should now be available under https://{your_username}.github.io/{your_repo_name}"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1",
+    "section": "",
+    "text": "This project addresses the challenge of understanding maritime activity patterns in the Port of Singapore using remotely sensed data. As one of the busiest port regions in the world, Singapore experiences dense ship traffic and complex spatial use across port zones, anchorage areas, and shipping lanes. Our application aims to provide an interactive way to explore these spatial patterns using satellite radar imagery.\n\n\n\nThis application is designed for students, researchers, and users interested in maritime monitoring and spatial analysis. It helps users explore how satellite imagery can reveal activity patterns in port environments and supports better understanding of how maritime space is used in a globally significant shipping hub.\n\n\n\nThe project uses Sentinel-1 GRD data from Google Earth Engine. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.\n\n\n\nThe workflow begins by defining the study area and filtering Sentinel-1 images by location, date, instrument mode, and polarisation. A composite image is generated as an initial preprocessing step. The processed data will then be used to identify spatial patterns of maritime activity and support further hotspot and temporal analysis in the application.\n\n\n\nThe interface is intended to support interactive exploration of maritime activity in the study area. Users will be able to view spatial outputs on a map and explore patterns in different parts of the port region. Additional interface components will be developed to improve navigation, data interpretation, and comparison of activity patterns.\n\n\n\n\nReplace the link below with the link to your application."
+  },
+  {
+    "objectID": "index.html#project-summary",
+    "href": "index.html#project-summary",
+    "title": "Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1",
+    "section": "",
+    "text": "This project addresses the challenge of understanding maritime activity patterns in the Port of Singapore using remotely sensed data. As one of the busiest port regions in the world, Singapore experiences dense ship traffic and complex spatial use across port zones, anchorage areas, and shipping lanes. Our application aims to provide an interactive way to explore these spatial patterns using satellite radar imagery.\n\n\n\nThis application is designed for students, researchers, and users interested in maritime monitoring and spatial analysis. It helps users explore how satellite imagery can reveal activity patterns in port environments and supports better understanding of how maritime space is used in a globally significant shipping hub.\n\n\n\nThe project uses Sentinel-1 GRD data from Google Earth Engine. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.\n\n\n\nThe workflow begins by defining the study area and filtering Sentinel-1 images by location, date, instrument mode, and polarisation. A composite image is generated as an initial preprocessing step. The processed data will then be used to identify spatial patterns of maritime activity and support further hotspot and temporal analysis in the application.\n\n\n\nThe interface is intended to support interactive exploration of maritime activity in the study area. Users will be able to view spatial outputs on a map and explore patterns in different parts of the port region. Additional interface components will be developed to improve navigation, data interpretation, and comparison of activity patterns."
+  },
+  {
+    "objectID": "index.html#the-application",
+    "href": "index.html#the-application",
+    "title": "Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1",
+    "section": "",
+    "text": "Replace the link below with the link to your application."
   }
 ]
