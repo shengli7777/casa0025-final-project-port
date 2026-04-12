@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>readme</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -38,12 +35,12 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ff73747157bea4a22cb1ab1a769f836e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-ff73747157bea4a22cb1ab1a769f836e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-deb901b02078fb902c6e1ae515dd94cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-165756a7da4f6a4eff214c1ae5448f53.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-7026a1002ff3d6519a94cc5e6fbb9ee0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e05ccfec0bb336031d76a8ac60be18fc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -250,18 +247,137 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p>Use this repository to host a website for your CASA0025 final project by following these stpes:</p>
-<ol type="1">
-<li>clone this repository</li>
-<li>install <a href="https://quarto.org/docs/download/">quarto</a></li>
-<li>edit the ‘index.qmd’ file with the contents of your project</li>
-<li>using terminal, navigate to the project directory and run “quarto render”</li>
-<li>push the changes to your github repository</li>
-<li>on github, navigate to Settings&gt;Pages&gt;Build and Deployment. Make sure that under “Source” it says “deploy from branch”. Under “Branch”, select “Main” in the first dropdown and “Docs” under the second drop down. Then press “Save”</li>
-</ol>
-<p>Your website should now be available under https://{your_username}.github.io/{your_repo_name}</p>
+<section id="interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1" class="level1">
+<h1>Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1</h1>
+<section id="project-overview" class="level2">
+<h2 class="anchored" data-anchor-id="project-overview">Project Overview</h2>
+<p>This project explores maritime activity and spatial use in the Port of Singapore and surrounding waters using Sentinel-1 SAR imagery in Google Earth Engine. The project delivers an interactive application that allows users to explore maritime patterns in one of the busiest shipping hubs in the world.</p>
+<p><strong>Live Application:</strong> <a href="https://quantum-balm-387314.projects.earthengine.app/view/singapore-port-maritime">singapore-port-maritime</a></p>
+<p><strong>Project Website:</strong> <a href="https://shengli7777.github.io/casa0025-final-project-port/">shengli7777.github.io/casa0025-final-project-port</a></p>
+<hr>
+</section>
+<section id="problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="problem-statement">Problem Statement</h2>
+<p>The Port of Singapore is one of the world’s most active maritime regions, with dense shipping traffic, anchorage areas, and port operations concentrated in a relatively small space. Understanding how maritime activity is distributed across this area is important for interpreting spatial patterns of sea use. This project develops an interactive application to explore these patterns using satellite radar data.</p>
+<hr>
+</section>
+<section id="end-user" class="level2">
+<h2 class="anchored" data-anchor-id="end-user">End User</h2>
+<p>This application is intended for students, researchers, and users interested in maritime monitoring, remote sensing, and spatial analysis. It provides an accessible way to explore how satellite imagery can be used to examine activity patterns in port and coastal environments.</p>
+<hr>
+</section>
+<section id="study-area" class="level2">
+<h2 class="anchored" data-anchor-id="study-area">Study Area</h2>
+<p>The study area covers the Port of Singapore and surrounding waters in southern Singapore. This area was selected because it is one of the busiest maritime hubs in the world, with dense ship traffic and clear spatial differences between port zones, anchorage areas, and shipping routes.</p>
+<p>The AOI spans longitude 103.60°E to 104.05°E and latitude 1.15°N to 1.36°N, covering both the core port area and nearby waters where significant maritime activity takes place.</p>
+<hr>
+</section>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>This project uses <strong>Sentinel-1 GRD</strong> imagery from <strong>Google Earth Engine</strong>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dataset</td>
+<td>COPERNICUS/S1_GRD</td>
+</tr>
+<tr class="even">
+<td>Sensor type</td>
+<td>Synthetic Aperture Radar (SAR)</td>
+</tr>
+<tr class="odd">
+<td>Date range</td>
+<td>2023-01-01 to 2023-12-31</td>
+</tr>
+<tr class="even">
+<td>Instrument mode</td>
+<td>IW</td>
+</tr>
+<tr class="odd">
+<td>Polarisation</td>
+<td>VV and VH</td>
+</tr>
+<tr class="even">
+<td>Total images</td>
+<td>109 (61 ascending, 48 descending)</td>
+</tr>
+</tbody>
+</table>
+<section id="why-sentinel-1" class="level3">
+<h3 class="anchored" data-anchor-id="why-sentinel-1">Why Sentinel-1?</h3>
+<p>SAR imagery is particularly suitable for maritime monitoring. Unlike optical imagery, it is unaffected by cloud cover and lighting conditions. The VV channel is sensitive to large metallic structures such as ship hulls, while VH captures volume scattering useful for distinguishing vessel types.</p>
+<hr>
+</section>
+</section>
+<section id="methodology" class="level2">
+<h2 class="anchored" data-anchor-id="methodology">Methodology</h2>
+<p>The project follows a four-stage preprocessing pipeline implemented in Google Earth Engine:</p>
+<p><strong>Stage 1 — Data Filtering:</strong> Sentinel-1 GRD images were filtered by AOI, date range, instrument mode, and polarisation. A median composite was generated as the baseline output.</p>
+<p><strong>Stage 2 — Speckle Filtering:</strong> A 3×3 focal mean filter was applied to reduce speckle noise inherent in SAR imagery, improving visual interpretability and reducing false positives in vessel detection.</p>
+<p><strong>Stage 3 — Water and Land Masking:</strong> The JRC Global Surface Water dataset was used to mask land pixels (water occurrence &gt; 50%). A 500-metre near-shore buffer was applied to remove coastal clutter using the USDOS LSIB coastline dataset.</p>
+<p><strong>Stage 4 — Vessel Detection:</strong> A threshold of VV &gt; −10 dB was applied to the clean preprocessed layer to identify high-backscatter pixels as approximate vessel detections.</p>
+<p>Three preprocessing configurations (Raw / Speckle filtered only / Full pipeline) were compared to evaluate the effect of each step.</p>
+<hr>
+</section>
+<section id="application-features" class="level2">
+<h2 class="anchored" data-anchor-id="application-features">Application Features</h2>
+<p>The interactive GEE application supports:</p>
+<ul>
+<li><strong>Month selector</strong> — view SAR composites for any month in 2023</li>
+<li><strong>Polarisation toggle</strong> — switch between VV and VH bands</li>
+<li><strong>Orbit direction filter</strong> — compare ascending vs descending passes</li>
+<li><strong>Vessel detection layer</strong> — orange highlights for VV &gt; −10 dB targets</li>
+<li><strong>Monthly backscatter chart</strong> — time series of mean VV and VH across 2023</li>
+<li><strong>Map legend</strong> — colour scale for SAR backscatter interpretation</li>
+</ul>
+<hr>
+</section>
+<section id="repository-structure" class="level2">
+<h2 class="anchored" data-anchor-id="repository-structure">Repository Structure</h2>
+<pre class="text"><code>casa0025-final-project-port/
+├── docs/                          # Rendered website (GitHub Pages)
+│   └── images/
+│       └── monthly_image_count.png
+├── images/
+│   ├── monthly_image_count.png
+│   └── app_screenshot.png
+├── scripts/
+│   ├── preprocessing_data.js      # Initial data filtering and compositing
+│   ├── preprocessing_masking.js   # Speckle filter, water mask, vessel detection
+│   └── app.js                     # Interactive GEE application script
+├── index.qmd                      # Website source (Quarto)
+├── _quarto.yml                    # Quarto configuration
+└── readme.md</code></pre>
+<hr>
+</section>
+<section id="limitations" class="level2">
+<h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
+<ul>
+<li>Speckle noise reduction is approximate; more advanced filters (e.g.&nbsp;Lee filter) may improve results</li>
+<li>Vessel detection is threshold-based and not validated against AIS data</li>
+<li>Near-shore buffer may exclude legitimate vessel detections close to port infrastructure</li>
+<li>Orbit geometry differences between ascending and descending passes affect backscatter comparability</li>
+</ul>
+<hr>
+</section>
+<section id="tools-and-platforms" class="level2">
+<h2 class="anchored" data-anchor-id="tools-and-platforms">Tools and Platforms</h2>
+<ul>
+<li><a href="https://earthengine.google.com/">Google Earth Engine</a> — satellite data processing and application hosting</li>
+<li><a href="https://quarto.org/">Quarto</a> — website generation</li>
+<li><a href="https://pages.github.com/">GitHub Pages</a> — website deployment</li>
+<li>Sentinel-1 GRD — European Space Agency / Copernicus Programme</li>
+</ul>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -328,14 +444,13 @@ ul.task-list li input[type="checkbox"] {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
