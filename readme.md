@@ -51,7 +51,7 @@ SAR imagery is particularly suitable for maritime monitoring. Unlike optical ima
 
 ## Methodology
 
-The project follows a four-stage preprocessing pipeline implemented in Google Earth Engine:
+The project follows a five-stage preprocessing pipeline implemented in Google Earth Engine:
 
 **Stage 1 — Data Filtering:** Sentinel-1 GRD images were filtered by AOI, date range, instrument mode, and polarisation. A median composite was generated as the baseline output.
 
