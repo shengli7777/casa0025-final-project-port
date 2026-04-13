@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>index</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -35,12 +38,12 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-7026a1002ff3d6519a94cc5e6fbb9ee0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-e05ccfec0bb336031d76a8ac60be18fc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-deb901b02078fb902c6e1ae515dd94cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-165756a7da4f6a4eff214c1ae5448f53.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -287,7 +290,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="methodology">Methodology</h2>
 <section id="overview" class="level3">
 <h3 class="anchored" data-anchor-id="overview">Overview</h3>
-<p>The project follows a four-stage processing pipeline: data filtering and collection, speckle filtering, water and land masking, and vessel detection. Each stage is implemented in Google Earth Engine using JavaScript and is documented in the project repository for reproducibility.</p>
+<p>The project follows a five-stage processing pipeline: data filtering and collection, speckle filtering, water and land masking, ship candidate detection, and interface-based analytical visualisation. Each stage is implemented in Google Earth Engine using JavaScript and is documented in the project repository for reproducibility.</p>
 </section>
 <section id="stage-1-data-filtering-and-collection" class="level3">
 <h3 class="anchored" data-anchor-id="stage-1-data-filtering-and-collection">Stage 1: Data Filtering and Collection</h3>
@@ -305,20 +308,18 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Water mask:</strong> The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.</p>
 <p><strong>Near-shore buffer:</strong> Coastal and near-shore areas produce complex mixed signals where land and water backscatter overlap, leading to high rates of false vessel detections. A 500-metre exclusion buffer was applied around all land boundaries using the USDOS LSIB simplified coastline dataset. Pixels within this buffer zone were removed from the clean output layer.</p>
 </section>
-<section id="stage-4-parameter-comparison" class="level3">
-<h3 class="anchored" data-anchor-id="stage-4-parameter-comparison">Stage 4: Parameter Comparison</h3>
-<p>Three preprocessing configurations were compared to evaluate the effect of each processing step:</p>
-<ul>
-<li><strong>Config A (Raw):</strong> Median composite with no filtering or masking applied</li>
-<li><strong>Config B (Speckle filtered):</strong> 3×3 focal mean filter applied, no masking</li>
-<li><strong>Config C (Full pipeline):</strong> Speckle filter + water mask + near-shore buffer (recommended)</li>
-</ul>
-<p>Mean VV backscatter values were calculated for each configuration across the study area. Config C produced the cleanest separation between open-water pixels and land/near-shore clutter, and was adopted as the standard preprocessing pipeline for vessel detection.</p>
+<section id="stage-4-ship-candidate-detection" class="level3">
+<h3 class="anchored" data-anchor-id="stage-4-ship-candidate-detection">Stage 4: Ship Candidate Detection</h3>
+<p>After preprocessing, ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels with VV backscatter above a selected threshold were first identified as bright targets. To reduce random noise and non-ship artefacts, connected-pixel filtering was then applied. Very small isolated detections were removed using a minimum connected-pixel threshold, while overly large bright objects were excluded using a maximum connected-pixel threshold.</p>
+<p>Several parameter combinations were tested to evaluate the stability of the detection results, including threshold values (<strong>-12, -10, -8</strong>), minimum connected pixels (<strong>1, 2, 3</strong>), and maximum connected pixels (<strong>10, 15, 25</strong>). Across the selected Singapore test scene, the main offshore ship targets remained relatively stable under these parameter ranges, suggesting that the main detections were driven by consistent high-backscatter targets rather than isolated random noise.</p>
+<p>A final parameter set of <strong>threshold = -10</strong>, <strong>minPixels = 2</strong>, and <strong>maxPixels = 15</strong> was selected as a balanced configuration. This setting preserved the major offshore targets while reducing some near-shore false positives. The output of this stage is a <strong>ship candidate detection mask</strong>, which forms the analytical basis for the following visualisation and interpretation steps.</p>
+<p><img src="images/ship_detection_final.png" class="img-fluid"></p>
+<p>Figure: Final ship candidate detection result using threshold = -10, minPixels = 2, and maxPixels = 15.</p>
 </section>
-<section id="stage-5-vessel-detection" class="level3">
-<h3 class="anchored" data-anchor-id="stage-5-vessel-detection">Stage 5: Vessel Detection</h3>
-<p>A threshold-based approach was used to identify candidate vessel locations in the preprocessed imagery. Pixels with VV backscatter exceeding <strong>−10 dB</strong> were flagged as high-return targets and classified as approximate vessel detections. This threshold was selected based on established values in the SAR maritime literature, where ship hulls and superstructures typically return VV values well above the −15 to −20 dB range characteristic of calm open water.</p>
-<p>The resulting detection layer provides a visual indicator of maritime activity density across the study area and is displayed as an interactive overlay in the application. Users should note that this is an approximate detection method and has not been validated against AIS or vessel registry data.</p>
+<section id="stage-5-interface-and-analytical-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="stage-5-interface-and-analytical-outputs">Stage 5: Interface and Analytical Outputs</h3>
+<p>The ship candidate detection result from Stage 4 is then used as the basis for the interactive application and subsequent interpretation of maritime activity patterns. Rather than repeating the detection process, this stage focuses on transforming the detection output into more interpretable user-facing layers and analytical summaries.</p>
+<p>This includes map-based exploration of ship candidate distributions, comparison of monthly SAR composites, chart-based inspection of backscatter variation, and visual interpretation of maritime activity density across different parts of the Port of Singapore. In this way, Stage 5 builds directly on the detection output generated in Stage 4 and integrates it into the final interactive application.</p>
 <hr>
 </section>
 <section id="interface" class="level3">
@@ -328,12 +329,12 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Month selector</strong>: Users can select any month in 2023 to view the corresponding Sentinel-1 median composite image for that period.</li>
 <li><strong>Polarisation toggle</strong>: Users can switch between VV and VH polarisation bands to explore different radar backscatter characteristics. VV is more sensitive to surface roughness and large structures, while VH captures volume scattering and is useful for distinguishing ship types.</li>
 <li><strong>Orbit direction filter</strong>: Users can choose between ascending passes, descending passes, or both combined, allowing comparison of viewing geometry effects on backscatter intensity.</li>
-<li><strong>Vessel detection layer</strong>: High-backscatter pixels exceeding a threshold (VV &gt; −10 dB) are highlighted in orange as approximate vessel detections, providing a simple visual indicator of maritime activity density.</li>
+<li><strong>Ship candidate detection layer</strong>: Threshold-based VV detections with connected-pixel and size filtering are displayed as an approximate ship candidate layer, providing a visual indicator of maritime activity density.</li>
 <li><strong>Monthly mean backscatter chart</strong>: A time series chart in the bottom-right corner shows mean VV and VH backscatter values across all 12 months of 2023, enabling users to identify temporal patterns in maritime activity.</li>
 <li><strong>Map legend</strong>: A colour scale legend is displayed to support interpretation of SAR backscatter values from low (dark) to high (bright).</li>
 </ul>
 <p><img src="images/app_screenshot.png" class="img-fluid"></p>
-<p>Figure: Screenshot of the interactive application showing SAR imagery, vessel detection layer, and monthly backscatter chart.</p>
+<p>Figure: Screenshot of the interactive application showing SAR imagery, ship candidate detection layer, and monthly backscatter chart.</p>
 <hr>
 </section>
 </section>
@@ -412,13 +413,14 @@ ul.task-list li input[type="checkbox"] {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

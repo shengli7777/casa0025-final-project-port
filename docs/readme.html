@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>readme</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -35,12 +38,12 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-7026a1002ff3d6519a94cc5e6fbb9ee0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-e05ccfec0bb336031d76a8ac60be18fc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-deb901b02078fb902c6e1ae515dd94cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-165756a7da4f6a4eff214c1ae5448f53.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -321,8 +324,9 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Stage 1 — Data Filtering:</strong> Sentinel-1 GRD images were filtered by AOI, date range, instrument mode, and polarisation. A median composite was generated as the baseline output.</p>
 <p><strong>Stage 2 — Speckle Filtering:</strong> A 3×3 focal mean filter was applied to reduce speckle noise inherent in SAR imagery, improving visual interpretability and reducing false positives in vessel detection.</p>
 <p><strong>Stage 3 — Water and Land Masking:</strong> The JRC Global Surface Water dataset was used to mask land pixels (water occurrence &gt; 50%). A 500-metre near-shore buffer was applied to remove coastal clutter using the USDOS LSIB coastline dataset.</p>
-<p><strong>Stage 4 — Vessel Detection:</strong> A threshold of VV &gt; −10 dB was applied to the clean preprocessed layer to identify high-backscatter pixels as approximate vessel detections.</p>
-<p>Three preprocessing configurations (Raw / Speckle filtered only / Full pipeline) were compared to evaluate the effect of each step.</p>
+<p><strong>Stage 4 — Ship Candidate Detection:</strong> Ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels above the selected VV threshold were first identified as bright targets. Connected-pixel filtering was then applied to remove isolated noise and overly large non-ship artefacts. Multiple parameter combinations were tested, including threshold values (-12, -10, -8), minimum connected pixels (1, 2, 3), and maximum connected pixels (10, 15, 25). A final parameter set of <strong>threshold = -10</strong>, <strong>minPixels = 2</strong>, and <strong>maxPixels = 15</strong> was selected as a balanced configuration.</p>
+<p><strong>Stage 5 — Interface and Analytical Outputs:</strong> The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, and chart-based summaries of maritime activity patterns.</p>
+<p>The output of Stage 4 is a <strong>ship candidate detection mask</strong>, which serves as the input for subsequent visualisation and interpretation in Stage 5.</p>
 <hr>
 </section>
 <section id="application-features" class="level2">
@@ -332,7 +336,7 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Month selector</strong> — view SAR composites for any month in 2023</li>
 <li><strong>Polarisation toggle</strong> — switch between VV and VH bands</li>
 <li><strong>Orbit direction filter</strong> — compare ascending vs descending passes</li>
-<li><strong>Vessel detection layer</strong> — orange highlights for VV &gt; −10 dB targets</li>
+<li><strong>Ship candidate detection layer</strong> — threshold-based VV detection with connected-pixel and size filtering</li>
 <li><strong>Monthly backscatter chart</strong> — time series of mean VV and VH across 2023</li>
 <li><strong>Map legend</strong> — colour scale for SAR backscatter interpretation</li>
 </ul>
@@ -347,9 +351,11 @@ ul.task-list li input[type="checkbox"] {
 ├── images/
 │   ├── monthly_image_count.png
 │   └── app_screenshot.png
+│   └── ship_detection_final.png
 ├── scripts/
 │   ├── preprocessing_data.js      # Initial data filtering and compositing
 │   ├── preprocessing_masking.js   # Speckle filter, water mask, vessel detection
+│   ├── ship_detection.js          # Ship candidate detection and parameter testing
 │   └── app.js                     # Interactive GEE application script
 ├── index.qmd                      # Website source (Quarto)
 ├── _quarto.yml                    # Quarto configuration
@@ -360,8 +366,10 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
 <ul>
 <li>Speckle noise reduction is approximate; more advanced filters (e.g.&nbsp;Lee filter) may improve results</li>
-<li>Vessel detection is threshold-based and not validated against AIS data</li>
+<li>Ship detection remains threshold-based and has not been validated against AIS or manually labelled vessel data</li>
 <li>Near-shore buffer may exclude legitimate vessel detections close to port infrastructure</li>
+<li>Some near-shore false positives may still remain in complex coastal environments</li>
+<li>Fixed threshold settings may miss weaker or smaller vessel targets</li>
 <li>Orbit geometry differences between ascending and descending passes affect backscatter comparability</li>
 </ul>
 <hr>
@@ -444,13 +452,14 @@ ul.task-list li input[type="checkbox"] {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
