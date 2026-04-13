@@ -59,9 +59,11 @@ The project follows a four-stage preprocessing pipeline implemented in Google Ea
 
 **Stage 3 — Water and Land Masking:** The JRC Global Surface Water dataset was used to mask land pixels (water occurrence > 50%). A 500-metre near-shore buffer was applied to remove coastal clutter using the USDOS LSIB coastline dataset.
 
-**Stage 4 — Vessel Detection:** A threshold of VV > −10 dB was applied to the clean preprocessed layer to identify high-backscatter pixels as approximate vessel detections.
+**Stage 4 — Ship Candidate Detection:** Ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels above the selected VV threshold were first identified as bright targets. Connected-pixel filtering was then applied to remove isolated noise and overly large non-ship artefacts. Multiple parameter combinations were tested, including threshold values (-12, -10, -8), minimum connected pixels (1, 2, 3), and maximum connected pixels (10, 15, 25). A final parameter set of **threshold = -10**, **minPixels = 2**, and **maxPixels = 15** was selected as a balanced configuration.
 
-Three preprocessing configurations (Raw / Speckle filtered only / Full pipeline) were compared to evaluate the effect of each step.
+**Stage 5 — Interface and Analytical Outputs:** The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, and chart-based summaries of maritime activity patterns.
+
+The output of Stage 4 is a **ship candidate detection mask**, which serves as the input for subsequent visualisation and interpretation in Stage 5.
 
 ---
 
@@ -72,7 +74,7 @@ The interactive GEE application supports:
 - **Month selector** — view SAR composites for any month in 2023
 - **Polarisation toggle** — switch between VV and VH bands
 - **Orbit direction filter** — compare ascending vs descending passes
-- **Vessel detection layer** — orange highlights for VV > −10 dB targets
+- **Ship candidate detection layer** — threshold-based VV detection with connected-pixel and size filtering
 - **Monthly backscatter chart** — time series of mean VV and VH across 2023
 - **Map legend** — colour scale for SAR backscatter interpretation
 
@@ -88,9 +90,11 @@ casa0025-final-project-port/
 ├── images/
 │   ├── monthly_image_count.png
 │   └── app_screenshot.png
+│   └── ship_detection_final.png
 ├── scripts/
 │   ├── preprocessing_data.js      # Initial data filtering and compositing
 │   ├── preprocessing_masking.js   # Speckle filter, water mask, vessel detection
+│   ├── ship_detection.js          # Ship candidate detection and parameter testing
 │   └── app.js                     # Interactive GEE application script
 ├── index.qmd                      # Website source (Quarto)
 ├── _quarto.yml                    # Quarto configuration
@@ -102,8 +106,10 @@ casa0025-final-project-port/
 ## Limitations
 
 - Speckle noise reduction is approximate; more advanced filters (e.g. Lee filter) may improve results
-- Vessel detection is threshold-based and not validated against AIS data
+- Ship detection remains threshold-based and has not been validated against AIS or manually labelled vessel data
 - Near-shore buffer may exclude legitimate vessel detections close to port infrastructure
+- Some near-shore false positives may still remain in complex coastal environments
+- Fixed threshold settings may miss weaker or smaller vessel targets
 - Orbit geometry differences between ascending and descending passes affect backscatter comparability
 
 ---
