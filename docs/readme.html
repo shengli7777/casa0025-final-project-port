@@ -320,12 +320,12 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="methodology" class="level2">
 <h2 class="anchored" data-anchor-id="methodology">Methodology</h2>
-<p>The project follows a four-stage preprocessing pipeline implemented in Google Earth Engine:</p>
+<p>The project follows a five-stage processing pipeline implemented in Google Earth Engine:</p>
 <p><strong>Stage 1 — Data Filtering:</strong> Sentinel-1 GRD images were filtered by AOI, date range, instrument mode, and polarisation. A median composite was generated as the baseline output.</p>
 <p><strong>Stage 2 — Speckle Filtering:</strong> A 3×3 focal mean filter was applied to reduce speckle noise inherent in SAR imagery, improving visual interpretability and reducing false positives in vessel detection.</p>
 <p><strong>Stage 3 — Water and Land Masking:</strong> The JRC Global Surface Water dataset was used to mask land pixels (water occurrence &gt; 50%). A 500-metre near-shore buffer was applied to remove coastal clutter using the USDOS LSIB coastline dataset.</p>
 <p><strong>Stage 4 — Ship Candidate Detection:</strong> Ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels above the selected VV threshold were first identified as bright targets. Connected-pixel filtering was then applied to remove isolated noise and overly large non-ship artefacts. Multiple parameter combinations were tested, including threshold values (-12, -10, -8), minimum connected pixels (1, 2, 3), and maximum connected pixels (10, 15, 25). A final parameter set of <strong>threshold = -10</strong>, <strong>minPixels = 2</strong>, and <strong>maxPixels = 15</strong> was selected as a balanced configuration.</p>
-<p><strong>Stage 5 — Interface and Analytical Outputs:</strong> The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, and chart-based summaries of maritime activity patterns.</p>
+<p><strong>Stage 5 — Interface and Analytical Outputs:</strong> The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, and chart-based summaries of maritime activity patterns. In the current application, the ship candidate detection layer is displayed in VV mode only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.</p>
 <p>The output of Stage 4 is a <strong>ship candidate detection mask</strong>, which serves as the input for subsequent visualisation and interpretation in Stage 5.</p>
 <hr>
 </section>
@@ -336,7 +336,7 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Month selector</strong> — view SAR composites for any month in 2023</li>
 <li><strong>Polarisation toggle</strong> — switch between VV and VH bands</li>
 <li><strong>Orbit direction filter</strong> — compare ascending vs descending passes</li>
-<li><strong>Ship candidate detection layer</strong> — threshold-based VV detection with connected-pixel and size filtering</li>
+<li><strong>Ship candidate detection layer</strong> — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering</li>
 <li><strong>Monthly backscatter chart</strong> — time series of mean VV and VH across 2023</li>
 <li><strong>Map legend</strong> — colour scale for SAR backscatter interpretation</li>
 </ul>
@@ -350,11 +350,11 @@ ul.task-list li input[type="checkbox"] {
 │       └── monthly_image_count.png
 ├── images/
 │   ├── monthly_image_count.png
-│   └── app_screenshot.png
+│   ├── app_screenshot.png
 │   └── ship_detection_final.png
 ├── scripts/
 │   ├── preprocessing_data.js      # Initial data filtering and compositing
-│   ├── preprocessing_masking.js   # Speckle filter, water mask, vessel detection
+│   ├── preprocessing_masking.js   # Speckle filter and masking
 │   ├── ship_detection.js          # Ship candidate detection and parameter testing
 │   └── app.js                     # Interactive GEE application script
 ├── index.qmd                      # Website source (Quarto)
@@ -366,7 +366,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
 <ul>
 <li>Speckle noise reduction is approximate; more advanced filters (e.g.&nbsp;Lee filter) may improve results</li>
-<li>Ship detection remains threshold-based and has not been validated against AIS or manually labelled vessel data</li>
+<li>Ship detection in this project remains approximate and has not been validated against AIS or manually labelled vessel data</li>
 <li>Near-shore buffer may exclude legitimate vessel detections close to port infrastructure</li>
 <li>Some near-shore false positives may still remain in complex coastal environments</li>
 <li>Fixed threshold settings may miss weaker or smaller vessel targets</li>

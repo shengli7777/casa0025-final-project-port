@@ -281,7 +281,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Interpretation is less intuitive than optical imagery and requires domain knowledge</li>
 <li>Orbit direction and viewing geometry may affect backscatter comparability across passes</li>
 <li>Near-shore areas produce complex mixed signals due to land-water boundary effects</li>
-<li>The vessel detection approach used here is threshold-based and approximate; it is not equivalent to a validated ship detection algorithm</li>
+<li>Ship detection in this project remains approximate and has not been validated against AIS or manually labelled vessel data</li>
+<li>Connected-pixel and size filtering reduce some false positives, but near-shore clutter and strong non-ship reflections may still affect detection quality</li>
 </ul>
 <hr>
 </section>
@@ -329,18 +330,19 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Month selector</strong>: Users can select any month in 2023 to view the corresponding Sentinel-1 median composite image for that period.</li>
 <li><strong>Polarisation toggle</strong>: Users can switch between VV and VH polarisation bands to explore different radar backscatter characteristics. VV is more sensitive to surface roughness and large structures, while VH captures volume scattering and is useful for distinguishing ship types.</li>
 <li><strong>Orbit direction filter</strong>: Users can choose between ascending passes, descending passes, or both combined, allowing comparison of viewing geometry effects on backscatter intensity.</li>
-<li><strong>Ship candidate detection layer</strong>: Threshold-based VV detections with connected-pixel and size filtering are displayed as an approximate ship candidate layer, providing a visual indicator of maritime activity density.</li>
+<li><strong>Ship candidate detection layer</strong>: In VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering, providing an approximate indicator of maritime activity density.</li>
 <li><strong>Monthly mean backscatter chart</strong>: A time series chart in the bottom-right corner shows mean VV and VH backscatter values across all 12 months of 2023, enabling users to identify temporal patterns in maritime activity.</li>
 <li><strong>Map legend</strong>: A colour scale legend is displayed to support interpretation of SAR backscatter values from low (dark) to high (bright).</li>
 </ul>
+<p>Ship candidate detection is currently displayed for the VV band only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.</p>
 <p><img src="images/app_screenshot.png" class="img-fluid"></p>
-<p>Figure: Screenshot of the interactive application showing SAR imagery, ship candidate detection layer, and monthly backscatter chart.</p>
+<p>Figure: Screenshot of the interactive application showing monthly Sentinel-1 SAR imagery, the ship candidate detection layer in VV mode, and the monthly mean backscatter chart.</p>
 <hr>
 </section>
 </section>
 <section id="the-application" class="level2">
 <h2 class="anchored" data-anchor-id="the-application">The Application</h2>
-<p>The interactive application is embedded below. Use the controls on the left panel to explore maritime activity patterns by month, polarisation, and orbit direction.</p>
+<p>The interactive application is embedded below. Use the controls on the left panel to explore maritime activity patterns by month, polarisation, and orbit direction. The ship candidate detection layer is currently displayed in VV mode and is based on thresholded VV backscatter with connected-pixel and size filtering.</p>
 <iframe src="https://quantum-balm-387314.projects.earthengine.app/view/singapore-port-maritime" width="100%" height="650px" frameborder="0" allowfullscreen="">
 </iframe>
 
