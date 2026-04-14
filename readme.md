@@ -51,7 +51,7 @@ SAR imagery is particularly suitable for maritime monitoring. Unlike optical ima
 
 ## Methodology
 
-The project follows a five-stage preprocessing pipeline implemented in Google Earth Engine:
+The project follows a five-stage processing pipeline implemented in Google Earth Engine:
 
 **Stage 1 — Data Filtering:** Sentinel-1 GRD images were filtered by AOI, date range, instrument mode, and polarisation. A median composite was generated as the baseline output.
 
@@ -61,7 +61,7 @@ The project follows a five-stage preprocessing pipeline implemented in Google Ea
 
 **Stage 4 — Ship Candidate Detection:** Ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels above the selected VV threshold were first identified as bright targets. Connected-pixel filtering was then applied to remove isolated noise and overly large non-ship artefacts. Multiple parameter combinations were tested, including threshold values (-12, -10, -8), minimum connected pixels (1, 2, 3), and maximum connected pixels (10, 15, 25). A final parameter set of **threshold = -10**, **minPixels = 2**, and **maxPixels = 15** was selected as a balanced configuration.
 
-**Stage 5 — Interface and Analytical Outputs:** The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, and chart-based summaries of maritime activity patterns.
+**Stage 5 — Interface and Analytical Outputs:** The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, and chart-based summaries of maritime activity patterns. In the current application, the ship candidate detection layer is displayed in VV mode only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.
 
 The output of Stage 4 is a **ship candidate detection mask**, which serves as the input for subsequent visualisation and interpretation in Stage 5.
 
@@ -74,7 +74,7 @@ The interactive GEE application supports:
 - **Month selector** — view SAR composites for any month in 2023
 - **Polarisation toggle** — switch between VV and VH bands
 - **Orbit direction filter** — compare ascending vs descending passes
-- **Ship candidate detection layer** — threshold-based VV detection with connected-pixel and size filtering
+- **Ship candidate detection layer** — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering
 - **Monthly backscatter chart** — time series of mean VV and VH across 2023
 - **Map legend** — colour scale for SAR backscatter interpretation
 
@@ -89,11 +89,11 @@ casa0025-final-project-port/
 │       └── monthly_image_count.png
 ├── images/
 │   ├── monthly_image_count.png
-│   └── app_screenshot.png
+│   ├── app_screenshot.png
 │   └── ship_detection_final.png
 ├── scripts/
 │   ├── preprocessing_data.js      # Initial data filtering and compositing
-│   ├── preprocessing_masking.js   # Speckle filter, water mask, vessel detection
+│   ├── preprocessing_masking.js   # Speckle filter and masking
 │   ├── ship_detection.js          # Ship candidate detection and parameter testing
 │   └── app.js                     # Interactive GEE application script
 ├── index.qmd                      # Website source (Quarto)
@@ -106,7 +106,7 @@ casa0025-final-project-port/
 ## Limitations
 
 - Speckle noise reduction is approximate; more advanced filters (e.g. Lee filter) may improve results
-- Ship detection remains threshold-based and has not been validated against AIS or manually labelled vessel data
+- Ship detection in this project remains approximate and has not been validated against AIS or manually labelled vessel data
 - Near-shore buffer may exclude legitimate vessel detections close to port infrastructure
 - Some near-shore false positives may still remain in complex coastal environments
 - Fixed threshold settings may miss weaker or smaller vessel targets
