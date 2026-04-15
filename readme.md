@@ -75,7 +75,9 @@ The interactive GEE application supports:
 - **Polarisation toggle** — switch between VV and VH bands
 - **Orbit direction filter** — compare ascending vs descending passes
 - **Ship candidate detection layer** — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering
-- **Monthly backscatter chart** — time series of mean VV and VH across 2023
+- **Monthly ship detection statistics** — column chart showing detected ship counts across all 12 months of 2023
+- **Monthly backscatter chart** — time series of mean VV and VH backscatter values across 2023
+- **Real-time ship count display** — current month ship statistics shown in the control panel
 - **Map legend** — colour scale for SAR backscatter interpretation
 
 ---

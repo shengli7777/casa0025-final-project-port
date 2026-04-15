@@ -103,14 +103,15 @@ The interactive application provides the following features for exploring mariti
 - **Orbit direction filter**: Users can choose between ascending passes, descending passes, or both combined, allowing comparison of viewing geometry effects on backscatter intensity.
 - **Ship candidate detection layer**: In VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering, providing an approximate indicator of maritime activity density. Real-time statistics show the total number of ships detected for the selected month and viewing parameters.
 - **Ship detection statistics**: Quantitative metrics including total ship count, detection pixel count, and coverage area are displayed in the control panel and console output for each time period and analysis configuration.
-- **Monthly mean backscatter chart**: A time series chart in the bottom-right corner shows mean VV and VH backscatter values across all 12 months of 2023, enabling users to identify temporal patterns in maritime activity.
+- **Monthly ship detection chart**: A column chart displays detected ship counts for each month in 2023, showing temporal variations in maritime activity. This quantitative visualization makes it easy to compare vessel density across different seasons.
+- **Monthly mean backscatter chart**: A time series chart shows mean VV and VH backscatter values across all 12 months of 2023, enabling users to identify temporal patterns in maritime activity and SAR signal intensity.
 - **Map legend**: A colour scale legend is displayed to support interpretation of SAR backscatter values from low (dark) to high (bright).
 
 Ship candidate detection and statistics are currently displayed for the VV band only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.
 
 ![](images/app_screenshot.png)
 
-Figure: Screenshot of the interactive application showing monthly Sentinel-1 SAR imagery, the ship candidate detection layer in VV mode, and the monthly mean backscatter chart.
+Figure: Screenshot of the interactive application showing monthly Sentinel-1 SAR imagery, the ship candidate detection layer in VV mode, monthly ship detection statistics chart, and the monthly mean backscatter chart.
 
 ---
 

@@ -521,14 +521,120 @@ legendPanel.add(borderLegend);
 Map.add(legendPanel);
 
 // -----------------------------
-// 10. 时间序列折线图
+// 10. 计算年度月份船舶数量统计
+// 生成月度船舶计数数据用于图表展示
+// -----------------------------
+var monthlyShipCounts = ee.FeatureCollection(
+  ee.List.sequence(1, 12).map(function(m) {
+    var start = ee.Date.fromYMD(2023, m, 1);
+    var end = start.advance(1, 'month');
+    
+    var monthFiltered = s1.filterDate(start, end).filterBounds(aoi)
+      .filter(ee.Filter.eq('instrumentMode', 'IW'));
+    
+    var monthDetectionCollection = monthFiltered.map(preprocessForDetection);
+    var monthDetectionComposite = monthDetectionCollection.median().clip(aoi);
+    
+    var shipThreshold = -10;
+    var minPixels = 2;
+    var maxPixels = 15;
+    
+    var shipMask = detectShips(
+      monthDetectionComposite,
+      shipThreshold,
+      minPixels,
+      maxPixels
+    );
+    
+    var shipCountResult = countShips(shipMask, 100);
+    var shipCountValue = shipCountResult.count.get('labels');
+    
+    return ee.Feature(null, {
+      month: m,
+      shipCount: shipCountValue
+    });
+  })
+);
+
+// Create ship count chart
+var shipCountChart = ui.Chart.feature.byFeature(monthlyShipCounts, 'month', 'shipCount')
+  .setChartType('ColumnChart')
+  .setOptions({
+    title: 'Monthly Ship Detection Statistics (2023)',
+    hAxis: {
+      title: 'Month',
+      ticks: [1,2,3,4,5,6,7,8,9,10,11,12],
+      format: '0'
+    },
+    vAxis: {
+      title: 'Number of Ships Detected'
+    },
+    colors: ['#1a73e8'],
+    bar: {groupWidth: '75%'},
+    legend: {position: 'top'},
+    height: 200
+  });
+
+// Create ship count chart panel
+var shipCountPanel = ui.Panel({
+  style: {
+    position: 'bottom-right',
+    padding: '8px',
+    width: '360px',
+    backgroundColor: 'rgba(255,255,255,0.92)'
+  }
+});
+
+shipCountPanel.add(ui.Label('Monthly Ship Detection Statistics (2023)', {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: '#333',
+  margin: '0 0 6px 0'
+}));
+
+shipCountPanel.add(shipCountChart);
+Map.add(shipCountPanel);
+
+// Add information panel about ship detection
+var shipDetectionInfoPanel = ui.Panel({
+  style: {
+    position: 'bottom-center',
+    padding: '8px 12px',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    margin: '0 0 380px 0'
+  }
+});
+
+shipDetectionInfoPanel.add(ui.Label('Ship Detection Information', {
+  fontSize: '11px',
+  fontWeight: 'bold',
+  color: '#333',
+  margin: '0 0 4px 0'
+}));
+
+shipDetectionInfoPanel.add(ui.Label(
+  'Monthly chart displays total ship candidates detected for each month.\n' +
+  'Detection parameters: threshold = -10, minPixels = 2, maxPixels = 15\n' +
+  'Current month statistics shown in control panel above.',
+  {
+    fontSize: '10px',
+    color: '#666',
+    whiteSpace: 'pre'
+  }
+));
+
+Map.add(shipDetectionInfoPanel);
+
+// -----------------------------
+// 11. 时间序列折线图（月度平均反向散射）
 // -----------------------------
 var chartPanel = ui.Panel({
   style: {
     position: 'bottom-right',
     padding: '8px',
     width: '340px',
-    backgroundColor: 'rgba(255,255,255,0.92)'
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    margin: '0 0 20px 0'
   }
 });
 
