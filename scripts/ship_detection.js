@@ -109,28 +109,9 @@ var maxPixels = 15;
 // ------------------------------
 var resultMask = detectShips(testImage, threshold, minPixels, maxPixels);
 
-// Calculate ship statistics using statistics module
-var shipStats = getShipStatistics(resultMask, aoi);
-var shipCountResult = countShips(resultMask, 100);
-
-// Extract and display final statistics
-printShipStatistics(shipStats, resultMask);
-
-// Generate formatted detection report
-var timestamp = testImage.get('system:time_start');
-var detectionReport = generateDetectionReport(
-  shipCountResult.count.get('labels'),
-  shipStats.pixelCount,
-  shipStats.coveredArea,
-  timestamp
-);
-
-print('Final Detection Report:');
-print(detectionReport);
-
-// ==============================
+// ------------------------------
 // 8. Visualisation
-// ==============================
+// ------------------------------
 Map.addLayer(
   testImage.select('VV_filtered'),
   {min: -22, max: -5},
@@ -145,9 +126,9 @@ Map.addLayer(
 
 print('Detection mask created successfully');
 
-// ==============================
+// ------------------------------
 // 9. Notes
-// ==============================
+// ------------------------------
 // Final parameter choice:
 // threshold = -10
 // minPixels = 2
@@ -155,7 +136,3 @@ print('Detection mask created successfully');
 //
 // These values were selected after testing multiple combinations
 // and comparing offshore target preservation and near-shore noise reduction.
-//
-// STATISTICS OUTPUT:
-// The above statistics provide the final count of detected ships
-// and their coverage area in the study region.
