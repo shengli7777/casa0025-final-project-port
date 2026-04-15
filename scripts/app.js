@@ -445,9 +445,10 @@ Map.add(controlPanel);
 // -----------------------------
 var legendPanel = ui.Panel({
   style: {
-    position: 'bottom-left',
+    position: 'top-right',
     padding: '8px 12px',
-    backgroundColor: 'rgba(255,255,255,0.92)'
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    margin: '0 0 20px 0'
   }
 });
 
@@ -556,7 +557,7 @@ var shipCountPanel = ui.Panel({
     width: '300px',
     backgroundColor: 'rgba(255,255,255,0.95)',
     margin: '0 0 20px 0',
-    border: '1px solid #ccc'
+    border: '2px solid #FF6600'
   }
 });
 
@@ -568,7 +569,6 @@ shipCountPanel.add(ui.Label('🚢 Monthly Ship Detection Statistics (2023)', {
 }));
 
 shipCountPanel.add(shipCountChart);
-Map.add(shipCountPanel);
 
 // Add information panel about ship detection
 var shipDetectionInfoPanel = ui.Panel({
@@ -580,23 +580,35 @@ var shipDetectionInfoPanel = ui.Panel({
   }
 });
 
-shipDetectionInfoPanel.add(ui.Label('Ship Detection Information', {
-  fontSize: '11px',
+shipDetectionInfoPanel.add(ui.Label('Ship Detection Statistics Chart', {
+  fontSize: '12px',
   fontWeight: 'bold',
   color: '#333',
-  margin: '0 0 4px 0'
+  margin: '0 0 8px 0'
 }));
 
-shipDetectionInfoPanel.add(ui.Label(
-  'Monthly chart displays sample ship detection statistics for 2023.\n' +
-  'Detection parameters: threshold = -10, minPixels = 2, maxPixels = 15\n' +
-  'Current month statistics shown in control panel above.',
-  {
-    fontSize: '10px',
-    color: '#666',
-    whiteSpace: 'pre'
-  }
-));
+// Create ship count chart using ui.Chart
+var shipDataArray = sampleShipData.map(function(item) {
+  return [item.month, item.shipCount];
+});
+
+var shipChart = ui.Chart.array.values({
+  array: shipDataArray,
+  xLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  axis: 0,
+  colors: ['#FF6600']
+}).setChartType('ColumnChart')
+  .setOptions({
+    title: '',
+    hAxis: {title: 'Month (2023)'},
+    vAxis: {title: 'Ships Detected'},
+    colors: ['#FF6600'],
+    bar: {groupWidth: '80%'},
+    height: 200,
+    legend: {position: 'none'}
+  });
+
+shipDetectionInfoPanel.add(shipChart);
 
 Map.add(shipDetectionInfoPanel);
 
@@ -668,6 +680,9 @@ var timeSeriesChart = ui.Chart.feature.byFeature(monthlyMeans, 'month', ['VV', '
 
 chartPanel.add(timeSeriesChart);
 Map.add(chartPanel);
+
+// Add ship count panel on top
+Map.add(shipCountPanel);
 
 // -----------------------------
 // 11. 初始化地图
