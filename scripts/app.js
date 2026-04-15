@@ -106,6 +106,47 @@ function detectShips(image, threshold, minPixels, maxPixels) {
   return filtered.selfMask();
 }
 
+// Count connected ship components
+function countShips(detectionMask, maxSearchDistance) {
+  var maxSearchDistance = maxSearchDistance || 100;
+  
+  var connectedComponents = detectionMask.connectedComponents(
+    ee.Kernel.plus(maxSearchDistance, 'pixels')
+  );
+  
+  var shipCountResult = connectedComponents.select('labels').reduceRegion({
+    reducer: ee.Reducer.max(),
+    geometry: detectionMask.geometry(),
+    scale: 10,
+    maxPixels: 1e9
+  });
+  
+  return {
+    components: connectedComponents,
+    count: shipCountResult
+  };
+}
+
+// Calculate ship detection statistics
+function getShipStatistics(detectionMask, aoi) {
+  var shipCountResult = countShips(detectionMask);
+  
+  var pixelCount = detectionMask.reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: aoi,
+    scale: 10,
+    maxPixels: 1e9
+  });
+  
+  var coveredArea = ee.Number(pixelCount.get('constant')).multiply(100);
+  
+  return {
+    shipCount: shipCountResult.count,
+    pixelCount: pixelCount,
+    coveredArea: coveredArea
+  };
+}
+
 function getMonthName(m) {
   var names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -161,9 +202,9 @@ function updateMap() {
     )
   );
 
-  // -------------------------
-  // 船舶检测图层：仅在 VV 模式下显示
-  // -------------------------
+  // -----------------------------------------------
+  // Ship Detection Layer: Display only in VV mode
+  // -----------------------------------------------
   if (currentBand === 'VV') {
     var detectionCollection = filtered.map(preprocessForDetection);
     var detectionComposite = detectionCollection.median().clip(aoi);
@@ -179,6 +220,10 @@ function updateMap() {
       maxPixels
     );
 
+    // Calculate ship statistics
+    var shipStatistics = getShipStatistics(shipMask, aoi);
+    var shipCountResult = countShips(shipMask, 100);
+
     Map.layers().set(
       2,
       ui.Map.Layer(
@@ -188,10 +233,20 @@ function updateMap() {
       )
     );
 
+    // Extract ship count value for display
+    var shipCountValue = shipCountResult.count.get('labels');
+    
+    // Updated detection info with statistics
     detectionInfoLabel.setValue(
       'Orange layer = ship candidate detection\n' +
+      'Ships Detected: ' + shipCountValue + '\n' +
       'threshold = -10, minPixels = 2, maxPixels = 15'
     );
+    
+    // Log statistics to console
+    print('Monthly Statistics - ' + getMonthName(currentMonth) + ' 2023:');
+    print('Total Ships Detected:', shipCountValue);
+    print('Ship Statistics:', shipStatistics);
   } else {
     Map.layers().set(
       2,
