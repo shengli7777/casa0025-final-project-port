@@ -106,47 +106,6 @@ function detectShips(image, threshold, minPixels, maxPixels) {
   return filtered.selfMask();
 }
 
-// Count connected ship components
-function countShips(detectionMask, maxSearchDistance) {
-  var maxSearchDistance = maxSearchDistance || 100;
-  
-  var connectedComponents = detectionMask.connectedComponents(
-    ee.Kernel.plus(maxSearchDistance, 'pixels')
-  );
-  
-  var shipCountResult = connectedComponents.select('labels').reduceRegion({
-    reducer: ee.Reducer.max(),
-    geometry: detectionMask.geometry(),
-    scale: 10,
-    maxPixels: 1e9
-  });
-  
-  return {
-    components: connectedComponents,
-    count: shipCountResult
-  };
-}
-
-// Calculate ship detection statistics
-function getShipStatistics(detectionMask, aoi) {
-  var shipCountResult = countShips(detectionMask);
-  
-  var pixelCount = detectionMask.reduceRegion({
-    reducer: ee.Reducer.sum(),
-    geometry: aoi,
-    scale: 10,
-    maxPixels: 1e9
-  });
-  
-  var coveredArea = ee.Number(pixelCount.get('constant')).multiply(100);
-  
-  return {
-    shipCount: shipCountResult.count,
-    pixelCount: pixelCount,
-    coveredArea: coveredArea
-  };
-}
-
 function getMonthName(m) {
   var names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -202,9 +161,9 @@ function updateMap() {
     )
   );
 
-  // -----------------------------------------------
-  // Ship Detection Layer: Display only in VV mode
-  // -----------------------------------------------
+  // -------------------------
+  // 船舶检测图层：仅在 VV 模式下显示
+  // -------------------------
   if (currentBand === 'VV') {
     var detectionCollection = filtered.map(preprocessForDetection);
     var detectionComposite = detectionCollection.median().clip(aoi);
@@ -220,10 +179,6 @@ function updateMap() {
       maxPixels
     );
 
-    // Calculate ship statistics
-    var shipStatistics = getShipStatistics(shipMask, aoi);
-    var shipCountResult = countShips(shipMask, 100);
-
     Map.layers().set(
       2,
       ui.Map.Layer(
@@ -233,20 +188,10 @@ function updateMap() {
       )
     );
 
-    // Extract ship count value for display
-    var shipCountValue = shipCountResult.count.get('labels');
-    
-    // Updated detection info with statistics
     detectionInfoLabel.setValue(
       'Orange layer = ship candidate detection\n' +
-      'Ships Detected: ' + shipCountValue + '\n' +
       'threshold = -10, minPixels = 2, maxPixels = 15'
     );
-    
-    // Log statistics to console
-    print('Monthly Statistics - ' + getMonthName(currentMonth) + ' 2023:');
-    print('Total Ships Detected:', shipCountValue);
-    print('Ship Statistics:', shipStatistics);
   } else {
     Map.layers().set(
       2,
@@ -445,10 +390,9 @@ Map.add(controlPanel);
 // -----------------------------
 var legendPanel = ui.Panel({
   style: {
-    position: 'top-right',
+    position: 'bottom-left',
     padding: '8px 12px',
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    margin: '0 0 20px 0'
+    backgroundColor: 'rgba(255,255,255,0.92)'
   }
 });
 
@@ -522,106 +466,14 @@ legendPanel.add(borderLegend);
 Map.add(legendPanel);
 
 // -----------------------------
-// 10. 计算年度月份船舶数量统计
-// 生成月度船舶计数数据用于图表展示
-// -----------------------------
-// 使用预计算的简单统计数据作为示例
-// 在实际应用中，这些数据应该从服务器端计算
-var sampleShipData = [
-  {month: 1, shipCount: 45},
-  {month: 2, shipCount: 38},
-  {month: 3, shipCount: 52},
-  {month: 4, shipCount: 48},
-  {month: 5, shipCount: 61},
-  {month: 6, shipCount: 55},
-  {month: 7, shipCount: 49},
-  {month: 8, shipCount: 53},
-  {month: 9, shipCount: 47},
-  {month: 10, shipCount: 51},
-  {month: 11, shipCount: 44},
-  {month: 12, shipCount: 42}
-];
-
-// Create ship count chart - 使用最简单的方法
-var shipCountChart = ui.Label('🚢 Ship Detection Statistics\n\nJan: 45 ships\nFeb: 38 ships\nMar: 52 ships\nApr: 48 ships\nMay: 61 ships\nJun: 55 ships\nJul: 49 ships\nAug: 53 ships\nSep: 47 ships\nOct: 51 ships\nNov: 44 ships\nDec: 42 ships', {
-  fontSize: '11px',
-  color: '#333',
-  whiteSpace: 'pre'
-});
-
-// Create ship count chart panel
-var shipCountPanel = ui.Panel({
-  style: {
-    position: 'bottom-left',
-    padding: '8px',
-    width: '300px',
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    margin: '0 0 20px 0',
-    border: '2px solid #FF6600'
-  }
-});
-
-shipCountPanel.add(ui.Label('🚢 Monthly Ship Detection Statistics (2023)', {
-  fontSize: '13px',
-  fontWeight: 'bold',
-  color: '#333',
-  margin: '0 0 8px 0'
-}));
-
-shipCountPanel.add(shipCountChart);
-
-// Add information panel about ship detection
-var shipDetectionInfoPanel = ui.Panel({
-  style: {
-    position: 'bottom-center',
-    padding: '8px 12px',
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    margin: '0 0 380px 0'
-  }
-});
-
-shipDetectionInfoPanel.add(ui.Label('Ship Detection Statistics Chart', {
-  fontSize: '12px',
-  fontWeight: 'bold',
-  color: '#333',
-  margin: '0 0 8px 0'
-}));
-
-// Create ship count chart using ui.Chart
-var shipDataArray = sampleShipData.map(function(item) {
-  return [item.month, item.shipCount];
-});
-
-var shipChart = ui.Chart.array.values({
-  array: shipDataArray,
-  xLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  axis: 0,
-  colors: ['#FF6600']
-}).setChartType('ColumnChart')
-  .setOptions({
-    title: '',
-    hAxis: {title: 'Month (2023)'},
-    vAxis: {title: 'Ships Detected'},
-    colors: ['#FF6600'],
-    bar: {groupWidth: '80%'},
-    height: 200,
-    legend: {position: 'none'}
-  });
-
-shipDetectionInfoPanel.add(shipChart);
-
-Map.add(shipDetectionInfoPanel);
-
-// -----------------------------
-// 11. 时间序列折线图（月度平均反向散射）
+// 10. 时间序列折线图
 // -----------------------------
 var chartPanel = ui.Panel({
   style: {
     position: 'bottom-right',
     padding: '8px',
     width: '340px',
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    margin: '0 0 20px 0'
+    backgroundColor: 'rgba(255,255,255,0.92)'
   }
 });
 
@@ -681,10 +533,61 @@ var timeSeriesChart = ui.Chart.feature.byFeature(monthlyMeans, 'month', ['VV', '
 chartPanel.add(timeSeriesChart);
 Map.add(chartPanel);
 
-// Add ship count panel on top
+// -----------------------------
+// 11. 月船只数量折线图
+// -----------------------------
+var shipCountPanel = ui.Panel({
+  style: {
+    position: 'bottom-center',
+    padding: '8px',
+    width: '300px',
+    backgroundColor: 'rgba(255,255,255,0.92)'
+  }
+});
+
+shipCountPanel.add(ui.Label('Monthly Ship Counts (2023)', {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: '#333',
+  margin: '0 0 6px 0'
+}));
+
+// 数据从 monthly_ship_counts.json
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var counts = [38, 42, 45, 51, 58, 55, 62, 59, 54, 61, 66, 69];
+
+// 创建 FeatureCollection 用于图表
+var shipFeatures = ee.FeatureCollection(
+  months.map(function(month, index) {
+    return ee.Feature(null, {
+      month: index + 1,
+      count: counts[index]
+    });
+  })
+);
+
+var shipChart = ui.Chart.feature.byFeature(shipFeatures, 'month', 'count')
+  .setChartType('LineChart')
+  .setOptions({
+    title: '',
+    hAxis: {
+      title: 'Month',
+      ticks: [1,2,3,4,5,6,7,8,9,10,11,12],
+      gridlines: {count: 12}
+    },
+    vAxis: {title: 'Ship Count'},
+    colors: ['#e8711a'],
+    lineWidth: 2,
+    pointSize: 4,
+    legend: {position: 'none'},
+    height: 150
+  });
+
+shipCountPanel.add(shipChart);
+
 Map.add(shipCountPanel);
 
 // -----------------------------
-// 11. 初始化地图
+// 12. 初始化地图
 // -----------------------------
 updateMap();

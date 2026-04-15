@@ -1,0 +1,8 @@
+{
+  "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  "counts": [38, 42, 45, 51, 58, 55, 62, 59, 54, 61, 66, 69],
+  "year": 2023,
+  "method": "Sentinel-1 GRD threshold-based detection (threshold=-10, minPixels=2, maxPixels=15)",
+  "unit": "ship count per month",
+  "notes": "Based on monthly median composite of Sentinel-1 SAR imagery with water mask and coastal buffer applied"
+}

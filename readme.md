@@ -75,7 +75,7 @@ The interactive GEE application supports:
 - **Polarisation toggle** — switch between VV and VH bands
 - **Orbit direction filter** — compare ascending vs descending passes
 - **Ship candidate detection layer** — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering
-- **Monthly ship detection statistics** — column chart showing detected ship counts across all 12 months of 2023
+- **Monthly ship detection statistics** — line chart showing detected ship counts across all 12 months of 2023
 - **Monthly backscatter chart** — time series of mean VV and VH backscatter values across 2023
 - **Real-time ship count display** — current month ship statistics shown in the control panel
 - **Map legend** — colour scale for SAR backscatter interpretation
@@ -86,21 +86,29 @@ The interactive GEE application supports:
 
 ```text
 casa0025-final-project-port/
+├── _quarto.yml                    # Quarto configuration for website rendering
+├── index.qmd                      # Main Quarto document for the project website
+├── index.tex                      # LaTeX version of the main document
+├── monokai.theme                  # Syntax highlighting theme
+├── readme.md                      # Project documentation
+├── data/
+│   └── monthly_ship_counts.json   # Monthly ship count data for 2023
 ├── docs/                          # Rendered website (GitHub Pages)
-│   └── images/
-│       └── monthly_image_count.png
+│   ├── index.html
+│   ├── readme.html
+│   ├── search.json
+│   ├── images/
+│   └── site_libs/
 ├── images/
 │   ├── monthly_image_count.png
 │   ├── app_screenshot.png
 │   └── ship_detection_final.png
-├── scripts/
-│   ├── preprocessing_data.js      # Initial data filtering and compositing
-│   ├── preprocessing_masking.js   # Speckle filter and masking
-│   ├── ship_detection.js          # Ship candidate detection and parameter testing
-│   └── app.js                     # Interactive GEE application script
-├── index.qmd                      # Website source (Quarto)
-├── _quarto.yml                    # Quarto configuration
-└── readme.md
+└── scripts/
+    ├── app.js                     # Interactive GEE application script
+    ├── monthly_ship_count.js      # Script for calculating monthly ship counts
+    ├── preprocessing_data.js      # Initial data filtering and compositing
+    ├── preprocessing_masking.js   # Speckle filter and masking
+    └── ship_detection.js          # Ship candidate detection and parameter testing
 ```
 
 ---
