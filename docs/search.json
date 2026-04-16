@@ -104,5 +104,4 @@
     "section": "",
     "text": "The interactive application is embedded below. Use the controls on the left panel to explore maritime activity patterns by month, polarisation, and orbit direction. The ship candidate detection layer is currently displayed in VV mode and is based on thresholded VV backscatter with connected-pixel and size filtering."
   }
-  
 ]
