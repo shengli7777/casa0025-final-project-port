@@ -534,60 +534,6 @@ chartPanel.add(timeSeriesChart);
 Map.add(chartPanel);
 
 // -----------------------------
-// 11. 月船只数量折线图
-// -----------------------------
-var shipCountPanel = ui.Panel({
-  style: {
-    position: 'bottom-center',
-    padding: '8px',
-    width: '300px',
-    backgroundColor: 'rgba(255,255,255,0.92)'
-  }
-});
-
-shipCountPanel.add(ui.Label('Monthly Ship Counts (2023)', {
-  fontSize: '12px',
-  fontWeight: 'bold',
-  color: '#333',
-  margin: '0 0 6px 0'
-}));
-
-// 数据从 monthly_ship_counts.json
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-var counts = [38, 42, 45, 51, 58, 55, 62, 59, 54, 61, 66, 69];
-
-// 创建 FeatureCollection 用于图表
-var shipFeatures = ee.FeatureCollection(
-  months.map(function(month, index) {
-    return ee.Feature(null, {
-      month: index + 1,
-      count: counts[index]
-    });
-  })
-);
-
-var shipChart = ui.Chart.feature.byFeature(shipFeatures, 'month', 'count')
-  .setChartType('LineChart')
-  .setOptions({
-    title: '',
-    hAxis: {
-      title: 'Month',
-      ticks: [1,2,3,4,5,6,7,8,9,10,11,12],
-      gridlines: {count: 12}
-    },
-    vAxis: {title: 'Ship Count'},
-    colors: ['#e8711a'],
-    lineWidth: 2,
-    pointSize: 4,
-    legend: {position: 'none'},
-    height: 150
-  });
-
-shipCountPanel.add(shipChart);
-
-Map.add(shipCountPanel);
-
-// -----------------------------
-// 12. 初始化地图
+// 11. 初始化地图
 // -----------------------------
 updateMap();
