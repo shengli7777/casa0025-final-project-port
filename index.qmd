@@ -71,16 +71,6 @@ Several parameter combinations were tested to evaluate the stability of the dete
 
 A final parameter set of **threshold = -10**, **minPixels = 2**, and **maxPixels = 15** was selected as a balanced configuration. This setting preserved the major offshore targets while reducing some near-shore false positives. The output of this stage is a **ship candidate detection mask**, which forms the analytical basis for the following visualisation and interpretation steps.
 
-#### Ship Detection Statistics
-
-The detection module provides quantitative statistics for each detection analysis:
-
-- **Total Ships Detected**: The number of connected ship candidates identified in the analysis region
-- **Detection Pixel Count**: The total pixel count of detected ship regions
-- **Coverage Area**: The spatial extent of detected ships in square metres and square kilometres
-
-These statistics are calculated automatically during the detection process and are displayed in the interactive application console and the detection information panel, enabling users to track maritime activity quantitatively across different time periods and geographical regions.
-
 ![](images/ship_detection_final.png)
 
 Figure: Final ship candidate detection result using threshold = -10, minPixels = 2, and maxPixels = 15.
@@ -101,17 +91,15 @@ The interactive application provides the following features for exploring mariti
 - **Month selector**: Users can select any month in 2023 to view the corresponding Sentinel-1 median composite image for that period.
 - **Polarisation toggle**: Users can switch between VV and VH polarisation bands to explore different radar backscatter characteristics. VV is more sensitive to surface roughness and large structures, while VH captures volume scattering and is useful for distinguishing ship types.
 - **Orbit direction filter**: Users can choose between ascending passes, descending passes, or both combined, allowing comparison of viewing geometry effects on backscatter intensity.
-- **Ship candidate detection layer**: In VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering, providing an approximate indicator of maritime activity density. Real-time statistics show the total number of ships detected for the selected month and viewing parameters.
-- **Ship detection statistics**: Quantitative metrics including total ship count, detection pixel count, and coverage area are displayed in the control panel and console output for each time period and analysis configuration.
-- **Monthly ship detection chart**: A column chart displays detected ship counts for each month in 2023, showing temporal variations in maritime activity. This quantitative visualization makes it easy to compare vessel density across different seasons.
-- **Monthly mean backscatter chart**: A time series chart shows mean VV and VH backscatter values across all 12 months of 2023, enabling users to identify temporal patterns in maritime activity and SAR signal intensity.
+- **Ship candidate detection layer**: In VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering, providing an approximate indicator of maritime activity density.
+- **Monthly mean backscatter chart**: A time series chart in the bottom-right corner shows mean VV and VH backscatter values across all 12 months of 2023, enabling users to identify temporal patterns in maritime activity.
 - **Map legend**: A colour scale legend is displayed to support interpretation of SAR backscatter values from low (dark) to high (bright).
 
-Ship candidate detection and statistics are currently displayed for the VV band only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.
+Ship candidate detection is currently displayed for the VV band only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.
 
 ![](images/app_screenshot.png)
 
-Figure: Screenshot of the interactive application showing monthly Sentinel-1 SAR imagery, the ship candidate detection layer in VV mode, monthly ship detection statistics chart, and the monthly mean backscatter chart.
+Figure: Screenshot of the interactive application showing monthly Sentinel-1 SAR imagery, the ship candidate detection layer in VV mode, and the monthly mean backscatter chart.
 
 ---
 
@@ -125,109 +113,3 @@ The interactive application is embedded below. Use the controls on the left pane
         frameborder="0"
         allowfullscreen>
 </iframe>
-
-## Monthly Ship Count Statistics
-
-Below is a chart showing the monthly ship count statistics for 2023, based on the ship detection algorithm applied to Sentinel-1 data.
-
-<div style="width: 100%; max-width: 800px; margin: 0 auto;">
-  <canvas id="shipChart" width="400" height="200"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Load monthly ship count data
-  fetch('data/monthly_ship_counts.json')
-    .then(response => response.json())
-    .then(data => {
-      const ctx = document.getElementById('shipChart').getContext('2d');
-      const shipChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: data.months,
-          datasets: [{
-            label: 'Ship Count',
-            data: data.counts,
-            backgroundColor: 'rgba(255, 152, 0, 0.6)',
-            borderColor: 'rgba(255, 152, 0, 1)',
-            borderWidth: 1.5
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                beginAtZero: true
-              },
-              title: {
-                display: true,
-                text: 'Number of Ships Detected'
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: 'Month (2023)'
-              }
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Monthly Ship Detection Counts in Port of Singapore (2023)',
-              font: {
-                size: 14,
-                weight: 'bold'
-              }
-            },
-            legend: {
-              display: true,
-              labels: {
-                padding: 15
-              }
-            }
-          }
-        }
-      });
-    })
-    .catch(error => {
-      console.error('Error loading monthly ship count data:', error);
-      // Fallback to static data if JSON fails to load
-      const ctx = document.getElementById('shipChart').getContext('2d');
-      const shipChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          datasets: [{
-            label: 'Ship Count',
-            data: [38, 42, 45, 51, 58, 55, 62, 59, 54, 61, 66, 69],
-            backgroundColor: 'rgba(255, 152, 0, 0.6)',
-            borderColor: 'rgba(255, 152, 0, 1)',
-            borderWidth: 1.5
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Number of Ships Detected'
-              }
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Monthly Ship Detection Counts in Port of Singapore (2023)'
-            }
-          }
-        }
-      });
-    });
-});
-</script>
