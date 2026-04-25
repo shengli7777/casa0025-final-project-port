@@ -1,0 +1,298 @@
+:root {
+  --marine-ink: #12324a;
+  --marine-muted: #4e6b7f;
+  --marine-blue: #0b6fa4;
+  --marine-deep: #06304a;
+  --marine-soft: #eaf6fb;
+  --marine-line: #bed8e7;
+  --hero-height: 390px;
+  --hero-gap: 4rem;
+  --page-shell-width: min(1260px, calc(100vw - 96px));
+}
+
+body,
+body.quarto-light,
+body.quarto-dark {
+  background: #eaf7ff;
+  color: var(--marine-ink);
+  font-family: "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+html,
+#quarto-content,
+main.content,
+.page-columns,
+.page-layout-full {
+  background: #eaf7ff;
+}
+
+#quarto-content,
+main.content {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 0 4rem 0 !important;
+}
+
+@media (min-width: 992px) {
+  #quarto-content.quarto-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 3rem;
+    width: var(--page-shell-width) !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    padding: 0 0 4rem 0 !important;
+  }
+
+  main.content {
+    order: 1 !important;
+    flex: 0 1 960px !important;
+    max-width: 960px !important;
+    width: 960px !important;
+    margin: 0 !important;
+  }
+
+  #quarto-margin-sidebar {
+    order: 2 !important;
+    flex: 0 0 210px !important;
+    width: 210px !important;
+    margin: calc(var(--hero-height) + var(--hero-gap)) 0 0 0 !important;
+    padding-top: 0;
+    align-self: flex-start;
+
+    position: sticky !important;
+    top: 4rem !important;
+    height: fit-content !important;
+    max-height: calc(100vh - 8rem);
+    overflow: visible !important;
+  }
+
+  #quarto-margin-sidebar nav#TOC,
+  #quarto-margin-sidebar .sidebar,
+  #quarto-margin-sidebar .sidebar nav,
+  #quarto-margin-sidebar .quarto-sidebar-toc,
+  #quarto-margin-sidebar .quarto-sidebar-toc nav {
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+#quarto-document-content > section.level1 {
+  width: 100%;
+  margin: 0;
+}
+
+#quarto-document-content > section.level1 > h1:first-child,
+#quarto-document-content > h1:first-child {
+  position: relative;
+  width: 100vw;
+  min-height: var(--hero-height);
+  margin: 0 0 var(--hero-gap) calc((var(--page-shell-width) - 100vw) / 2);
+  padding: 0 max(2rem, calc((100vw - 1260px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: clamp(2.45rem, 4.6vw, 4.7rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-align: center;
+  background-image:
+    linear-gradient(105deg, rgba(4, 38, 58, 0.64), rgba(4, 75, 109, 0.42), rgba(62, 18, 11, 0.34)),
+    url("images/ship.jpg");
+  background-size: cover;
+  background-position: center 48%;
+  box-shadow: inset 0 -120px 150px rgba(3, 27, 45, 0.18);
+}
+
+#quarto-document-content > section.level1 > h1:first-child::before,
+#quarto-document-content > h1:first-child::before {
+  display: none;
+}
+
+#quarto-document-content > section.level1 > section.level2:first-of-type > h2:first-child {
+  margin-top: 0;
+}
+
+#quarto-margin-sidebar .quarto-listing-category,
+#quarto-margin-sidebar .quarto-title-meta-heading {
+  color: var(--marine-deep);
+}
+
+#quarto-margin-sidebar nav#TOC {
+  position: static !important;
+  top: auto !important;
+  margin-top: 0 !important;
+  padding: 0 0 0 0.9rem;
+  border-left: 2px solid #8ec9e3;
+  background: transparent;
+}
+
+#quarto-margin-sidebar nav#TOC #toc-title {
+  margin: 0 0 0.35rem 0;
+  color: var(--marine-deep);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+#quarto-margin-sidebar nav#TOC ul {
+  padding-left: 0;
+}
+
+#quarto-margin-sidebar nav#TOC > ul > li > ul.collapse,
+#quarto-margin-sidebar nav#TOC > ul > li > ul.collapsing {
+  display: block !important;
+  height: auto !important;
+  visibility: visible !important;
+}
+
+#quarto-margin-sidebar nav#TOC > ul > li > a[href="#interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1"] {
+  display: none;
+}
+
+#quarto-margin-sidebar nav#TOC > ul > li > ul {
+  padding-left: 0 !important;
+}
+
+#quarto-margin-sidebar nav#TOC > ul > li > ul > li > ul.collapse,
+#quarto-margin-sidebar nav#TOC > ul > li > ul > li > ul.collapsing {
+  display: none !important;
+  height: auto !important;
+  visibility: visible !important;
+}
+
+#quarto-margin-sidebar nav#TOC > ul > li > ul > li.toc-section-active > ul.collapse,
+#quarto-margin-sidebar nav#TOC > ul > li > ul > li.toc-section-active > ul.collapsing {
+  display: block !important;
+}
+
+#quarto-margin-sidebar nav#TOC ul ul {
+  padding-left: 0.6rem;
+}
+
+#quarto-margin-sidebar nav#TOC a {
+  padding: 0.19rem 0 0.19rem 0.45rem;
+  color: #42657a;
+  border-left: 0;
+  font-size: 0.93rem;
+  line-height: 1.35;
+}
+
+#quarto-margin-sidebar nav#TOC a:hover,
+#quarto-margin-sidebar nav#TOC a.active,
+#quarto-margin-sidebar nav#TOC a.active-section {
+  color: var(--marine-blue);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #0b6fa4;
+}
+
+#quarto-margin-sidebar nav#TOC a.active-section:not(.active) {
+  color: #255d7d;
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 #8ec9e3;
+}
+
+h2 {
+  margin-top: 2.4rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 2px solid var(--marine-line);
+  color: var(--marine-deep);
+  font-size: 2rem;
+}
+
+h3 {
+  margin-top: 1.7rem;
+  color: var(--marine-blue);
+  font-size: 1.35rem;
+}
+
+p,
+li {
+  color: var(--marine-ink);
+  font-size: 1.03rem;
+  line-height: 1.78;
+}
+
+strong {
+  color: var(--marine-deep);
+}
+
+hr {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid var(--marine-line);
+  margin: 2.2rem 0;
+}
+
+ul {
+  padding-left: 1.3rem;
+}
+
+li::marker {
+  color: var(--marine-blue);
+}
+
+img {
+  max-width: 100%;
+}
+
+p > img:only-child {
+  display: block;
+  width: min(100%, 980px);
+  margin: 1.4rem auto 0.7rem;
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(7, 47, 71, 0.16);
+}
+
+.gee-app-frame {
+  display: block;
+  width: min(100%, 960px);
+  height: 900px;
+  margin: 1.4rem auto 1rem;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(7, 47, 71, 0.18);
+  background: #ffffff;
+}
+
+a {
+  color: #0877b2;
+}
+
+@media (max-width: 760px) {
+  #quarto-content.quarto-container {
+    padding: 0 1rem 4rem 1rem !important;
+  }
+
+  :root {
+    --hero-height: 300px;
+    --hero-gap: 2.2rem;
+    --page-shell-width: calc(100vw - 2rem);
+  }
+
+  #quarto-document-content > section.level1 > h1:first-child,
+  #quarto-document-content > h1:first-child {
+    min-height: var(--hero-height);
+    margin-left: -1rem;
+    padding: 0 1.2rem;
+    font-size: 2.6rem;
+    align-items: center;
+  }
+
+  #quarto-document-content > section.level1 > h1:first-child::before,
+  #quarto-document-content > h1:first-child::before {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .gee-app-frame {
+    height: 820px;
+  }
+}

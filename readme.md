@@ -4,7 +4,7 @@
 
 This project explores maritime activity and spatial use in the Port of Singapore and surrounding waters using Sentinel-1 SAR imagery in Google Earth Engine. The project delivers an interactive application that allows users to explore maritime patterns in one of the busiest shipping hubs in the world.
 
-**Live Application:** [singapore-port-maritime](https://quantum-balm-387314.projects.earthengine.app/view/singapore-port-maritime)
+**Live Application:** [singapore-port-maritime](https://week6-gee-coursework.projects.earthengine.app/view/singapore-port-maritime)
 
 **Project Website:** [shengli7777.github.io/casa0025-final-project-port](https://shengli7777.github.io/casa0025-final-project-port/)
 
@@ -61,7 +61,7 @@ The project follows a five-stage processing pipeline implemented in Google Earth
 
 **Stage 4 — Ship Candidate Detection:** Ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels above the selected VV threshold were first identified as bright targets. Connected-pixel filtering was then applied to remove isolated noise and overly large non-ship artefacts. Multiple parameter combinations were tested, including threshold values (-12, -10, -8), minimum connected pixels (1, 2, 3), and maximum connected pixels (10, 15, 25). A final parameter set of **threshold = -10**, **minPixels = 2**, and **maxPixels = 15** was selected as a balanced configuration.
 
-**Stage 5 — Interface and Analytical Outputs:** The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, and chart-based summaries of maritime activity patterns. In the current application, the ship candidate detection layer is displayed in VV mode only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.
+**Stage 5 — Interface and Analytical Outputs:** The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, layer toggles, regional statistics, linked charts, and point-query outputs. In the current application, the ship candidate detection layer is displayed in VV mode only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.
 
 The output of Stage 4 is a **ship candidate detection mask**, which serves as the input for subsequent visualisation and interpretation in Stage 5.
 
@@ -71,12 +71,33 @@ The output of Stage 4 is a **ship candidate detection mask**, which serves as th
 
 The interactive GEE application supports:
 
-- **Month selector** — view SAR composites for any month in 2023
+- **Month slider and navigation buttons** — view SAR composites for any month in 2023
 - **Polarisation toggle** — switch between VV and VH bands
 - **Orbit direction filter** — compare ascending vs descending passes
+- **Layer controls** — independently show or hide the SAR composite, ship candidates, density heatmap, and analysis zones
+- **Regional analysis selector** — focus statistics on the full AOI or four interpretable port sub-regions
 - **Ship candidate detection layer** — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering
-- **Monthly backscatter chart** — time series of mean VV and VH across 2023
+- **Current summary panel** — image availability, mean VV/VH, candidate pixels, and density totals for the selected view
+- **Point query** — click the map to return coordinates, zone, VV/VH backscatter, and nearby candidate pixels within 1 km
+- **Linked monthly charts** — mean VV/VH time series and relative ship candidate bars; chart clicks update the map month
+- **Annual heatmap** — on-demand full-year ship density layer for comparing monthly and annual patterns
 - **Map legend** — colour scale for SAR backscatter interpretation
+- **Method and limitations panel** — concise explanation of the detection rule and validation limits
+
+---
+
+## Stage 5 UI / Visualisation Contribution
+
+The Stage 5 script is implemented in `scripts/app.js`. It turns the Stage 4 detection output into a complete Google Earth Engine app suitable for live demonstration and assessment. The key contribution is the user-facing interaction layer:
+
+- Built a clean multi-panel Earth Engine interface with controls, legend, summary, point query, and linked charts
+- Added month, polarisation, orbit, region, and layer controls
+- Added regional summaries for west anchorage, central harbour, east anchorage, and southern approach zones
+- Added click-based local inspection using a 1 km buffer around the selected point
+- Added monthly density heatmaps, an on-demand annual heatmap, and chart-to-map linking
+- Added method and limitations text inside the app so users can interpret the outputs responsibly
+
+For the presentation, this section can be demonstrated by selecting a month, switching VV/VH and orbit direction, changing the analysis region, toggling the detection and heatmap layers, clicking a vessel-dense area, and using the monthly bar chart to jump to a different month.
 
 ---
 
@@ -120,3 +141,4 @@ casa0025-final-project-port/
 - [Quarto](https://quarto.org/) — website generation
 - [GitHub Pages](https://pages.github.com/) — website deployment
 - Sentinel-1 GRD — European Space Agency / Copernicus Programme
+- [CASA25 Rasternauts](https://maheer-maps.github.io/CASA25_Rasternauts/) — reviewed as a previous high-quality CASA0025 example for UI structure and live-demo clarity

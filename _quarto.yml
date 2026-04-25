@@ -1,29 +1,24 @@
 project:
   type: website
   output-dir: docs
+  resources:
+    - images/
+    - toc-active.js
 
-book:
-  title: "CASA0025 Final Assessment"
-  author: "Group Name"
-  date: "01/01/2024"
-  chapters:
-    - index.qmd
-
-  repo-actions: [edit]
-  downloads: [pdf, epub]
-  sharing: [twitter, facebook]
-  favicon: favicon.ico
-  sidebar:
-    logo: casa_logo.png
-
-
+website:
+  title: "Singapore Shipping Activity Dashboard"
+  favicon: images/ship-mark.svg
 
 format:
   html:
-    theme:
-      dark: darkly
-      light: cosmo
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-title: "Contents"
+    toc-location: right
+    toc-depth: 3
+    include-after-body: _includes/toc-active.html
     code-copy: true
     code-overflow: wrap
     highlight-style: monokai.theme
-    linkcolor: "#34a832"
+    linkcolor: "#1e6fa8"

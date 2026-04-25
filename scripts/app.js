@@ -1,12 +1,86 @@
 // =============================================
-// app.js
-// Interactive Maritime Activity Analysis
-// Port of Singapore - Sentinel-1 SAR
-// Updated with optimized computation to prevent server timeouts
+// CASA0025 Final Project - Stage 5
+// Interactive Maritime Activity Explorer
+// Port of Singapore, Sentinel-1 SAR, 2023
+// Role: Member 5 - UI / visualisation lead
 // =============================================
 
 // -----------------------------
-// 1. 定义研究区 AOI
+// 1. Project constants
+// -----------------------------
+var YEAR = 2023;
+var DETECTION_THRESHOLD = -10;
+var DETECTION_MIN_PIXELS = 2;
+var DETECTION_MAX_PIXELS = 15;
+var LOCAL_QUERY_RADIUS_METRES = 1000;
+
+var MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+var MONTH_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+var SAR_PALETTE = ['061326', '0C3B66', '1F7CB7', '66D4F1', 'FFFFFF'];
+var HEATMAP_PALETTE = [
+  'FFF7BC', 'FEE391', 'FEC44F', 'FE9929',
+  'EC7014', 'E85D04', 'D62828', '9D0208'
+];
+var HEATMAP_RADIUS_PEAK_METRES = 120;
+var HEATMAP_RADIUS_SPREAD_METRES = 260;
+var HEATMAP_RADIUS_BLEND_METRES = 420;
+var HEATMAP_VIS_MIN = 0.2;
+var HEATMAP_VIS_MAX = 4.5;
+var HEATMAP_VIS_BOOST = 3.5;
+
+var vvVis = {
+  bands: ['VV'],
+  min: -25,
+  max: 0,
+  palette: SAR_PALETTE
+};
+
+var vhVis = {
+  bands: ['VH'],
+  min: -30,
+  max: -5,
+  palette: SAR_PALETTE
+};
+
+var detectionVis = {
+  palette: ['FF7A1A'],
+  opacity: 0.92
+};
+
+var heatmapVis = {
+  min: HEATMAP_VIS_MIN,
+  max: HEATMAP_VIS_MAX,
+  palette: HEATMAP_PALETTE,
+  opacity: 0.84
+};
+
+var UI_TEXT_PRIMARY = '#0F3554';
+var UI_TEXT_SECONDARY = '#4D6B85';
+var UI_BORDER = '#B9D4E6';
+var UI_DIVIDER = '#D6E5F0';
+var UI_PANEL_BG = '#F4FAFE';
+var UI_PANEL_BG_ALT = '#EAF4FB';
+var UI_PANEL_BG_STRONG = '#D4E7F5';
+var UI_PANEL_BG_DISABLED = '#E2EDF5';
+var UI_BORDER_STRONG = '#7DAFD1';
+var UI_ACCENT = '#1E6FA8';
+var UI_ACCENT_DARK = '#0E4E7A';
+
+var monthlyChartStats = new Array(12);
+var monthlyChartStatsLoaded = false;
+var monthlyChartStatsLoading = false;
+var fixedOverviewRequestId = 0;
+
+// -----------------------------
+// 2. Study area and analysis zones
 // -----------------------------
 var aoi = ee.Geometry.Polygon(
   [[[103.60, 1.15],
@@ -16,17 +90,51 @@ var aoi = ee.Geometry.Polygon(
     [103.60, 1.15]]]
 );
 
+var analysisRegions = ee.FeatureCollection([
+  ee.Feature(
+    ee.Geometry.Rectangle([103.60, 1.20, 103.75, 1.36]),
+    {region_id: 'WEST', region_name: 'West anchorage'}
+  ),
+  ee.Feature(
+    ee.Geometry.Rectangle([103.75, 1.20, 103.90, 1.36]),
+    {region_id: 'CENTRAL', region_name: 'Central harbour'}
+  ),
+  ee.Feature(
+    ee.Geometry.Rectangle([103.90, 1.20, 104.05, 1.36]),
+    {region_id: 'EAST', region_name: 'East anchorage'}
+  ),
+  ee.Feature(
+    ee.Geometry.Rectangle([103.60, 1.15, 104.05, 1.20]),
+    {region_id: 'SOUTH', region_name: 'Southern approach'}
+  )
+]);
+
+var regionItems = [
+  {label: 'Full study area', value: 'ALL'},
+  {label: 'West anchorage', value: 'WEST'},
+  {label: 'Central harbour', value: 'CENTRAL'},
+  {label: 'East anchorage', value: 'EAST'},
+  {label: 'Southern approach', value: 'SOUTH'}
+];
+
+var regionNameById = {
+  ALL: 'Full study area',
+  WEST: 'West anchorage',
+  CENTRAL: 'Central harbour',
+  EAST: 'East anchorage',
+  SOUTH: 'Southern approach'
+};
+
 // -----------------------------
-// 2. 加载 Sentinel-1 数据
+// 3. Data loading and masks
 // -----------------------------
 var s1 = ee.ImageCollection('COPERNICUS/S1_GRD')
   .filterBounds(aoi)
-  .filterDate('2023-01-01', '2023-12-31')
-  .filter(ee.Filter.eq('instrumentMode', 'IW'));
+  .filterDate('2023-01-01', '2024-01-01')
+  .filter(ee.Filter.eq('instrumentMode', 'IW'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'));
 
-// -----------------------------
-// 2b. 预加载水体/陆地掩膜
-// -----------------------------
 var waterOccurrence = ee.Image('JRC/GSW1_4/GlobalSurfaceWater')
   .select('occurrence');
 var waterMask = waterOccurrence.gt(50);
@@ -42,30 +150,93 @@ var coastalBuffer = landImage.focal_max({
 var openWaterMask = coastalBuffer.eq(0);
 
 // -----------------------------
-// 3. 状态变量
+// 4. Application state
 // -----------------------------
 var currentMonth = 1;
+var currentTimeSelection = 'year';
 var currentBand = 'VV';
 var currentOrbit = 'BOTH';
-var showHeatmap = true;
+var currentRegion = 'ALL';
+var showSarLayer = true;
+var showDetectionLayer = true;
+var showHeatmapLayer = true;
+var showZoneLayer = true;
+
+var currentFilteredCollection = null;
+var currentComposite = null;
+var currentDetectionMask = null;
+var currentHeatmap = null;
+var currentPage = 'select';
+var syncUiState = false;
+var syncTimeSelectionUi = false;
+var vhButtonLocked = false;
 
 // -----------------------------
-// 4. 地图设置
+// 5. Earth Engine helper functions
 // -----------------------------
-Map.setCenter(103.82, 1.26, 11);
-Map.setOptions('HYBRID');
-Map.style().set('cursor', 'crosshair');
+function getMonthName(monthNumber) {
+  return MONTH_NAMES[monthNumber - 1];
+}
 
-var aoiBorder = ee.Image().byte().paint({
-  featureCollection: ee.FeatureCollection([ee.Feature(aoi)]),
-  color: 1,
-  width: 2
-});
-Map.addLayer(aoiBorder, {palette: ['FF0000']}, 'Study Area Boundary', true);
+function getMonthShortName(monthNumber) {
+  return MONTH_SHORT[monthNumber - 1];
+}
 
-// -----------------------------
-// 5. 船舶检测核心函数
-// -----------------------------
+function getMonthStart(monthNumber) {
+  return ee.Date.fromYMD(YEAR, monthNumber, 1);
+}
+
+function getMonthEnd(monthNumber) {
+  return getMonthStart(monthNumber).advance(1, 'month');
+}
+
+function emptySarImage() {
+  return ee.Image.constant([-999, -999])
+    .rename(['VV', 'VH'])
+    .updateMask(ee.Image(0))
+    .clip(aoi);
+}
+
+function emptyCleanImage() {
+  return ee.Image.constant([-999, -999])
+    .rename(['VV_filtered', 'VH_filtered'])
+    .updateMask(ee.Image(0))
+    .clip(aoi);
+}
+
+function emptySingleBandImage(name) {
+  return ee.Image.constant(0)
+    .rename(name)
+    .updateMask(ee.Image(0))
+    .clip(aoi);
+}
+
+function filterByOrbit(collection) {
+  if (currentOrbit === 'ASCENDING') {
+    return collection.filter(ee.Filter.eq('orbitProperties_pass', 'ASCENDING'));
+  }
+
+  if (currentOrbit === 'DESCENDING') {
+    return collection.filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+  }
+
+  return collection;
+}
+
+function getMonthlyCollection(monthNumber) {
+  return filterByOrbit(
+    s1.filterDate(getMonthStart(monthNumber), getMonthEnd(monthNumber))
+  );
+}
+
+function makeMonthlyComposite(collection) {
+  return ee.Image(ee.Algorithms.If(
+    collection.size().gt(0),
+    collection.median().clip(aoi),
+    emptySarImage()
+  ));
+}
+
 function preprocessForDetection(image) {
   image = ee.Image(image);
 
@@ -77,548 +248,1375 @@ function preprocessForDetection(image) {
     .focal_mean({radius: 1, kernelType: 'square', units: 'pixels'})
     .rename('VH_filtered');
 
-  return ee.Image(vv.addBands(vh))
+  return vv.addBands(vh)
     .updateMask(waterMask)
     .updateMask(openWaterMask)
     .copyProperties(image, ['system:time_start', 'orbitProperties_pass']);
 }
 
-function detectShips(image, threshold, minPixels, maxPixels) {
-  image = ee.Image(image);
-  var vv = image.select('VV_filtered');
-  var brightTargets = vv.gt(threshold);
+function detectShipsFromCleanImage(cleanImage) {
+  cleanImage = ee.Image(cleanImage);
+
+  var brightTargets = cleanImage.select('VV_filtered')
+    .gt(DETECTION_THRESHOLD);
   var connected = brightTargets.connectedPixelCount(100, true);
   var filtered = brightTargets
-    .updateMask(connected.gte(minPixels))
-    .updateMask(connected.lte(maxPixels));
-  return filtered.selfMask();
+    .updateMask(connected.gte(DETECTION_MIN_PIXELS))
+    .updateMask(connected.lte(DETECTION_MAX_PIXELS));
+
+  return filtered.selfMask().rename('ship');
 }
 
-// -----------------------------
-// 5b. 单景船舶检测 → 0/1 掩膜
-// -----------------------------
+function makeDetectionMask(collection) {
+  var cleanCollection = collection.map(preprocessForDetection);
+  var cleanComposite = ee.Image(ee.Algorithms.If(
+    collection.size().gt(0),
+    cleanCollection.median().clip(aoi),
+    emptyCleanImage()
+  ));
+
+  return detectShipsFromCleanImage(cleanComposite);
+}
+
 function detectShipBinary(image) {
   image = ee.Image(image);
 
   var vv = image.select('VV')
     .focal_mean({radius: 1, kernelType: 'square', units: 'pixels'});
 
-  var brightTargets = vv.gt(-10);
+  var brightTargets = vv.gt(DETECTION_THRESHOLD);
   var connected = brightTargets.connectedPixelCount(100, true);
   var shipMask = brightTargets
-    .updateMask(connected.gte(2))
-    .updateMask(connected.lte(15));
+    .updateMask(connected.gte(DETECTION_MIN_PIXELS))
+    .updateMask(connected.lte(DETECTION_MAX_PIXELS));
 
-  // 应用水体 / 陆地掩膜，返回 0/1
-  var result = shipMask
+  return shipMask
     .unmask(0)
     .updateMask(waterMask)
     .updateMask(openWaterMask)
     .unmask(0)
+    .rename('ship')
+    .copyProperties(image, ['system:time_start', 'orbitProperties_pass']);
+}
+
+function makeHeatmap(collection) {
+  var heatmap = ee.Image(ee.Algorithms.If(
+    collection.size().gt(0),
+    collection.map(detectShipBinary).select('ship').sum().clip(aoi),
+    emptySingleBandImage('ship')
+  ));
+
+  return heatmap.rename('ship');
+}
+
+function makeHeatmapDisplay(heatmap) {
+  heatmap = ee.Image(heatmap);
+
+  var smoothed = heatmap
+    .focal_max({
+      radius: HEATMAP_RADIUS_PEAK_METRES,
+      kernelType: 'circle',
+      units: 'meters'
+    })
+    .focal_mean({
+      radius: HEATMAP_RADIUS_SPREAD_METRES,
+      kernelType: 'circle',
+      units: 'meters'
+    })
+    .focal_mean({
+      radius: HEATMAP_RADIUS_BLEND_METRES,
+      kernelType: 'circle',
+      units: 'meters'
+    })
+    .multiply(HEATMAP_VIS_BOOST);
+
+  return smoothed
+    .updateMask(smoothed.gt(HEATMAP_VIS_MIN))
     .rename('ship');
-
-  return ee.Image(result)
-    .copyProperties(image, ['system:time_start']);
 }
 
-// -----------------------------
-// 5c. 热点图生成
-// -----------------------------
-function buildHeatmap(filteredCollection) {
-  var shipPresence = filteredCollection.map(detectShipBinary);
-  var heatmap = shipPresence.select('ship').sum().clip(aoi);
-  return heatmap;
-}
-
-function getMonthName(m) {
-  var names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return names[m - 1];
-}
-
-// -----------------------------
-// 6. 图层占位
-// -----------------------------
-Map.addLayer(ee.Image(), {}, 'SAR Layer', false);
-Map.addLayer(ee.Image(), {}, 'Ship Detection Layer', false);
-Map.addLayer(ee.Image(), {}, 'Ship Density Heatmap', false);
-
-// -----------------------------
-// 7. 核心函数：更新地图
-// -----------------------------
-function updateMap() {
-  var startDate = ee.Date.fromYMD(2023, currentMonth, 1);
-  var endDate = startDate.advance(1, 'month');
-
-  var filtered = s1.filterDate(startDate, endDate);
-
-  if (currentOrbit === 'ASCENDING') {
-    filtered = filtered.filter(ee.Filter.eq('orbitProperties_pass', 'ASCENDING'));
-  } else if (currentOrbit === 'DESCENDING') {
-    filtered = filtered.filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+function selectedRegionFeatureCollection() {
+  if (currentRegion === 'ALL') {
+    return ee.FeatureCollection([ee.Feature(aoi, {
+      region_id: 'ALL',
+      region_name: 'Full study area'
+    })]);
   }
 
-  var composite = filtered.median().clip(aoi);
+  return analysisRegions.filter(ee.Filter.eq('region_id', currentRegion));
+}
 
-  var visParams;
-  if (currentBand === 'VV') {
-    visParams = {
-      bands: ['VV'], min: -25, max: 0,
-      palette: ['000000', '0000FF', '00FFFF', 'FFFFFF']
-    };
-  } else {
-    visParams = {
-      bands: ['VH'], min: -30, max: -5,
-      palette: ['000000', '0000FF', '00FFFF', 'FFFFFF']
-    };
+function selectedRegionGeometry() {
+  if (currentRegion === 'ALL') {
+    return aoi;
   }
 
-  Map.layers().set(1,
-    ui.Map.Layer(composite, visParams,
-      'SAR ' + currentBand + ' - ' + getMonthName(currentMonth) + ' 2023')
-  );
+  return selectedRegionFeatureCollection().geometry();
+}
 
-  if (currentBand === 'VV') {
-    var detectionCollection = filtered.map(preprocessForDetection);
-    var detectionComposite = detectionCollection.median().clip(aoi);
+function formatNumber(value, decimals) {
+  if (value === null || value === undefined) {
+    return 'n/a';
+  }
 
-    var shipMask = detectShips(detectionComposite, -10, 2, 15);
+  return Number(value).toFixed(decimals);
+}
 
-    Map.layers().set(2,
-      ui.Map.Layer(shipMask,
-        {palette: ['FF6600'], opacity: 0.9},
-        'Ship Candidate Detection')
-    );
+function formatInteger(value) {
+  if (value === null || value === undefined) {
+    return 'n/a';
+  }
 
-    if (showHeatmap) {
-      var heatmap = buildHeatmap(filtered);
-      Map.layers().set(3,
-        ui.Map.Layer(heatmap.selfMask(),
-          {min: 1, max: 10,
-           palette: ['FFFF00', 'FF8800', 'FF0000', 'CC0044', '660033'],
-           opacity: 0.65},
-          'Ship Density Heatmap - ' + getMonthName(currentMonth))
-      );
-    } else {
-      Map.layers().set(3,
-        ui.Map.Layer(ee.Image().selfMask(), {}, 'Ship Density Heatmap')
-      );
+  return Math.round(Number(value)).toLocaleString('en-US');
+}
+
+// -----------------------------
+// 6. UI helper functions
+// -----------------------------
+function sectionTitle(text) {
+  return ui.Label(text, {
+    fontSize: '15px',
+    fontWeight: 'bold',
+    color: UI_TEXT_PRIMARY,
+    margin: '0 0 10px 0'
+  });
+}
+
+function smallText(text) {
+  return ui.Label(text, {
+    fontSize: '11px',
+    color: UI_TEXT_SECONDARY,
+    margin: '0 0 8px 0'
+  });
+}
+
+function sectionPanel() {
+  return ui.Panel({
+    style: {
+      padding: '14px 14px 12px 14px',
+      stretch: 'horizontal'
     }
+  });
+}
 
-    detectionInfoLabel.setValue(
-      'Orange = ship candidates (threshold=-10)\n' +
-      'Heatmap = cumulative ship density this month'
-    );
-  } else {
-    Map.layers().set(2,
-      ui.Map.Layer(ee.Image().selfMask(), {}, 'Ship Candidate Detection')
-    );
-    Map.layers().set(3,
-      ui.Map.Layer(ee.Image().selfMask(), {}, 'Ship Density Heatmap')
-    );
-    detectionInfoLabel.setValue(
-      'Ship detection & heatmap are displayed\nfor VV mode only.'
-    );
+function dividerLine() {
+  return ui.Panel({
+    style: {
+      height: '1px',
+      backgroundColor: UI_DIVIDER,
+      stretch: 'horizontal',
+      margin: '0 14px'
+    }
+  });
+}
+
+function cardPanel(width) {
+  return ui.Panel({
+    style: {
+      width: width,
+      padding: '10px',
+      margin: '0 8px 8px 0',
+      backgroundColor: UI_PANEL_BG,
+      border: '1px solid ' + UI_BORDER
+    }
+  });
+}
+
+function addCard(parent, title, value, note, width) {
+  var card = cardPanel(width || '182px');
+  var valueLabel;
+  var noteLabel = null;
+  card.add(ui.Label(title, {
+    fontSize: '11px',
+    fontWeight: 'bold',
+    color: UI_TEXT_PRIMARY,
+    margin: '0 0 8px 0',
+    textAlign: 'center',
+    stretch: 'horizontal'
+  }));
+  valueLabel = ui.Label(value, {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: UI_ACCENT_DARK,
+    margin: '0 0 4px 0',
+    textAlign: 'center',
+    stretch: 'horizontal'
+  });
+  card.add(valueLabel);
+  if (note) {
+    noteLabel = ui.Label(note, {
+      fontSize: '10px',
+      color: UI_TEXT_SECONDARY,
+      margin: '0',
+      textAlign: 'center',
+      stretch: 'horizontal'
+    });
+    card.add(noteLabel);
   }
+  parent.add(card);
+  return {
+    card: card,
+    value: valueLabel,
+    note: noteLabel
+  };
+}
 
-  statusLabel.setValue(
-    'Showing: ' + getMonthName(currentMonth) +
-    ' 2023 | Band: ' + currentBand +
-    ' | Orbit: ' + currentOrbit
-  );
+function makeColorBar(palette, min, max, width) {
+  return ui.Thumbnail({
+    image: ee.Image.pixelLonLat().select(0)
+      .add(180)
+      .multiply((max - min) / 360.0)
+      .add(min)
+      .visualize({min: min, max: max, palette: palette}),
+    params: {bbox: '-180,0,180,10', dimensions: (width || 180) + 'x14'},
+    style: {margin: '4px 0 2px 0', stretch: 'horizontal'}
+  });
+}
+
+function makeSwatch(color) {
+  return ui.Label('', {
+    backgroundColor: color,
+    padding: '7px',
+    margin: '2px 8px 2px 0'
+  });
+}
+
+function makeSummaryRow(labelText) {
+  var row = ui.Panel({
+    layout: ui.Panel.Layout.flow('horizontal'),
+    style: {
+      stretch: 'horizontal',
+      margin: '0 0 6px 0',
+      border: '0 0 1px 0',
+      borderColor: UI_DIVIDER,
+      padding: '0 0 6px 0'
+    }
+  });
+
+  var keyLabel = ui.Label(labelText, {
+    fontSize: '11px',
+    fontWeight: 'bold',
+    color: UI_TEXT_PRIMARY,
+    margin: '0',
+    width: '120px'
+  });
+
+  var valueLabel = ui.Label('...', {
+    fontSize: '11px',
+    color: UI_TEXT_SECONDARY,
+    margin: '0',
+    stretch: 'horizontal'
+  });
+
+  row.add(keyLabel);
+  row.add(valueLabel);
+
+  return {
+    row: row,
+    value: valueLabel
+  };
+}
+
+function makeExplorerStatRow(labelText) {
+  var row = ui.Panel({
+    layout: ui.Panel.Layout.flow('horizontal'),
+    style: {
+      stretch: 'horizontal',
+      margin: '0',
+      padding: '16px 0',
+      border: '0 0 1px 0',
+      borderColor: UI_DIVIDER
+    }
+  });
+
+  var keyLabel = ui.Label(labelText, {
+    fontSize: '14px',
+    color: UI_TEXT_PRIMARY,
+    margin: '0',
+    width: '195px'
+  });
+
+  var valueLabel = ui.Label('...', {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    color: UI_ACCENT,
+    margin: '0',
+    stretch: 'horizontal',
+    textAlign: 'right'
+  });
+
+  row.add(keyLabel);
+  row.add(valueLabel);
+
+  return {
+    row: row,
+    value: valueLabel
+  };
+}
+
+function chartStatsFeatureCollection() {
+  return ee.FeatureCollection(monthlyChartStats.map(function(row) {
+    return ee.Feature(null, {
+      month: row.month,
+      label: row.label,
+      images: row.images,
+      meanVV: row.meanVV,
+      meanVH: row.meanVH,
+      candidates: row.candidates,
+      density: row.density
+    });
+  }));
 }
 
 // -----------------------------
-// 8. UI 控制面板
+// 7. Layout and map
 // -----------------------------
-var titlePanel = ui.Panel({
-  style: {
-    position: 'top-center',
-    padding: '8px 15px',
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    border: '0px'
-  }
-});
-titlePanel.add(ui.Label('Maritime Activity - Port of Singapore', {
-  fontSize: '16px', fontWeight: 'bold', color: 'white', margin: '0px'
-}));
-Map.add(titlePanel);
+ui.root.clear();
 
-var controlPanel = ui.Panel({
-  style: {
-    position: 'top-left',
-    padding: '10px',
-    width: '260px',
-    backgroundColor: 'rgba(255,255,255,0.92)'
-  }
+var appMap = ui.Map();
+appMap.setCenter(103.82, 1.255, 11);
+appMap.setOptions('HYBRID');
+appMap.style().set('cursor', 'crosshair');
+appMap.setControlVisibility({
+  all: false,
+  zoomControl: true,
+  mapTypeControl: true,
+  scaleControl: true,
+  fullscreenControl: true
 });
 
-controlPanel.add(ui.Label('Controls', {
-  fontSize: '14px', fontWeight: 'bold', color: '#333333', margin: '0 0 8px 0'
-}));
+var sidebar = ui.Panel({
+  style: {
+    width: '430px',
+    padding: '0',
+    backgroundColor: '#FFFFFF',
+    stretch: 'vertical'
+  }
+});
 
-controlPanel.add(ui.Label('Month (2023)', {
-  fontSize: '12px', fontWeight: 'bold', color: '#555'
-}));
+var splitPanel = ui.SplitPanel({
+  firstPanel: sidebar,
+  secondPanel: appMap,
+  orientation: 'horizontal',
+  wipe: false,
+  style: {stretch: 'both'}
+});
 
-var monthSelect = ui.Select({
-  items: [
-    {label: 'January',   value: '1'},
-    {label: 'February',  value: '2'},
-    {label: 'March',     value: '3'},
-    {label: 'April',     value: '4'},
-    {label: 'May',       value: '5'},
-    {label: 'June',      value: '6'},
-    {label: 'July',      value: '7'},
-    {label: 'August',    value: '8'},
-    {label: 'September', value: '9'},
-    {label: 'October',   value: '10'},
-    {label: 'November',  value: '11'},
-    {label: 'December',  value: '12'}
-  ],
-  value: '1',
-  onChange: function(val) {
-    currentMonth = parseInt(val, 10);
-    updateMap();
+ui.root.widgets().reset([splitPanel]);
+
+var zoneOutline = ee.Image().byte().paint({
+  featureCollection: analysisRegions,
+  color: 1,
+  width: 1
+});
+
+var aoiBorder = ee.Image().byte().paint({
+  featureCollection: ee.FeatureCollection([ee.Feature(aoi)]),
+  color: 1,
+  width: 2
+});
+
+appMap.layers().reset([
+  ui.Map.Layer(emptySarImage(), vvVis, 'SAR composite', true),
+  ui.Map.Layer(emptySingleBandImage('ship'), heatmapVis, 'Monthly ship density heatmap', false),
+  ui.Map.Layer(emptySingleBandImage('ship'), detectionVis, 'Ship candidate detection', true),
+  ui.Map.Layer(zoneOutline, {palette: ['00D1FF'], opacity: 0.8}, 'Analysis zones', true),
+  ui.Map.Layer(emptySingleBandImage('selected'), {palette: ['FFFFFF'], opacity: 0.95}, 'Selected region', false),
+  ui.Map.Layer(aoiBorder, {palette: ['FF3B30'], opacity: 0.95}, 'Study area boundary', true)
+]);
+
+// -----------------------------
+// 8. Sidebar sections
+// -----------------------------
+var header = ui.Panel({
+  style: {
+    padding: '18px 18px 14px 18px',
+    backgroundColor: '#FFFFFF',
+    stretch: 'horizontal'
+  }
+});
+header.add(ui.Label('Port of Singapore Maritime Activity Tool', {
+  fontSize: '24px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 6px 0'
+}));
+header.add(smallText('Sentinel-1 SAR ship candidate exploration for 2023.'));
+sidebar.add(header);
+sidebar.add(dividerLine());
+
+var selectPage = ui.Panel({
+  style: {stretch: 'horizontal'}
+});
+
+var explorerPage = ui.Panel({
+  style: {stretch: 'horizontal', shown: false}
+});
+
+sidebar.add(selectPage);
+sidebar.add(explorerPage);
+
+var yearSection = sectionPanel();
+yearSection.add(sectionTitle('Time Slice'));
+yearSection.add(smallText('Select the full-year 2023 summary or choose a month from the dropdown.'));
+
+var yearSelectButton = ui.Button({
+  label: '2023',
+  onClick: function() {
+    currentTimeSelection = 'year';
+    updateOverviewPanel();
   },
-  style: {width: '230px', margin: '4px 0 10px 0'}
+  style: {
+    stretch: 'horizontal',
+    margin: '0 0 14px 0',
+    padding: '18px 16px',
+    textAlign: 'left',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    backgroundColor: UI_PANEL_BG_STRONG,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER_STRONG
+  }
 });
-controlPanel.add(monthSelect);
+yearSection.add(yearSelectButton);
 
-controlPanel.add(ui.Label('Polarisation', {
-  fontSize: '12px', fontWeight: 'bold', color: '#555'
+yearSection.add(ui.Label('Month', {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 8px 0'
 }));
 
-var bandPanel = ui.Panel({
-  layout: ui.Panel.Layout.flow('horizontal'),
-  style: {margin: '4px 0 10px 0'}
+var monthSelectDropdown = ui.Select({
+  items: MONTH_NAMES.map(function(label, index) {
+    return {
+      label: label + ' ' + YEAR,
+      value: index + 1
+    };
+  }),
+  value: currentMonth,
+  onChange: function(value) {
+    if (syncTimeSelectionUi) {
+      return;
+    }
+    setCurrentMonth(Number(value));
+  },
+  style: {
+    stretch: 'horizontal',
+    margin: '0 0 6px 0',
+    backgroundColor: UI_PANEL_BG_ALT,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER
+  }
 });
+yearSection.add(monthSelectDropdown);
+selectPage.add(yearSection);
+selectPage.add(dividerLine());
 
-var vvBtn = ui.Button({
+var overviewSection = sectionPanel();
+var overviewTitle = sectionTitle('2023 Overview');
+overviewSection.add(overviewTitle);
+var overviewNote = smallText('Reference values for Full study area and Both passes. Candidate pixels and density sum remain relative indicators rather than validated vessel counts.');
+overviewSection.add(overviewNote);
+var overviewCards = ui.Panel({
+  layout: ui.Panel.Layout.flow('horizontal', true),
+  style: {stretch: 'horizontal'}
+});
+var overviewImagesCard = addCard(overviewCards, 'Sentinel-1 Images', '...', 'full study area | both passes', '182px');
+var overviewMeanVvCard = addCard(overviewCards, 'Mean VV', '...', 'full study area | both passes', '182px');
+var overviewMeanVhCard = addCard(overviewCards, 'Mean VH', '...', 'full study area | both passes', '182px');
+var overviewCandidatesCard = addCard(overviewCards, 'Candidate Pixels', '...', 'full study area | both passes', '182px');
+var overviewDensityCard = addCard(overviewCards, 'Density Sum', '...', 'full study area | both passes', '372px');
+overviewSection.add(overviewCards);
+selectPage.add(overviewSection);
+
+var nextPageSection = sectionPanel();
+var nextPageButton = ui.Button({
+  label: 'Next',
+  onClick: function() {
+    currentPage = 'explore';
+    updatePageVisibility();
+  },
+  style: {
+    stretch: 'horizontal',
+    backgroundColor: UI_PANEL_BG_STRONG,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER_STRONG
+  }
+});
+nextPageSection.add(nextPageButton);
+selectPage.add(nextPageSection);
+
+var controlsSection = sectionPanel();
+controlsSection.add(sectionTitle('Map Explorer'));
+
+controlsSection.add(ui.Label('Region', {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 4px 0'
+}));
+var regionSelect = ui.Select({
+  items: regionItems,
+  value: currentRegion,
+  onChange: function(value) {
+    currentRegion = value;
+    zoomToSelectedRegion();
+    updateSelectedRegionLayer();
+    updateViewSummary();
+  },
+  style: {
+    stretch: 'horizontal',
+    margin: '0 0 8px 0',
+    backgroundColor: UI_PANEL_BG_ALT,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER
+  }
+});
+controlsSection.add(regionSelect);
+
+var zoomButton = ui.Button({
+  label: 'Zoom to selected region',
+  onClick: zoomToSelectedRegion,
+  style: {
+    stretch: 'horizontal',
+    margin: '0 0 12px 0',
+    backgroundColor: UI_PANEL_BG_STRONG,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER_STRONG
+  }
+});
+controlsSection.add(zoomButton);
+
+controlsSection.add(ui.Label('Polarisation', {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 4px 0'
+}));
+var bandButtonPanel = ui.Panel({
+  layout: ui.Panel.Layout.flow('horizontal'),
+  style: {margin: '0 0 10px 0'}
+});
+var vvButton = ui.Button({
   label: 'VV',
   onClick: function() {
     currentBand = 'VV';
-    vvBtn.style().set('backgroundColor', '#1a73e8');
-    vvBtn.style().set('color', 'white');
-    vhBtn.style().set('backgroundColor', '#f0f0f0');
-    vhBtn.style().set('color', '#333');
-    updateMap();
+    updateApp(false);
   },
-  style: {width: '108px', backgroundColor: '#1a73e8', color: 'white', margin: '0 4px 0 0'}
+  style: {
+    width: '190px',
+    margin: '0 8px 0 0',
+    backgroundColor: UI_PANEL_BG_ALT,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER
+  }
 });
-
-var vhBtn = ui.Button({
+var vhButton = ui.Button({
   label: 'VH',
   onClick: function() {
     currentBand = 'VH';
-    vhBtn.style().set('backgroundColor', '#1a73e8');
-    vhBtn.style().set('color', 'white');
-    vvBtn.style().set('backgroundColor', '#f0f0f0');
-    vvBtn.style().set('color', '#333');
-    updateMap();
+    updateApp(false);
   },
-  style: {width: '108px', backgroundColor: '#f0f0f0', color: '#333'}
+  style: {
+    width: '190px',
+    margin: '0',
+    backgroundColor: UI_PANEL_BG_ALT,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER
+  }
 });
+bandButtonPanel.add(vvButton);
+bandButtonPanel.add(vhButton);
+controlsSection.add(bandButtonPanel);
 
-bandPanel.add(vvBtn);
-bandPanel.add(vhBtn);
-controlPanel.add(bandPanel);
-
-controlPanel.add(ui.Label('Orbit Direction', {
-  fontSize: '12px', fontWeight: 'bold', color: '#555'
+controlsSection.add(ui.Label('Orbit direction', {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 4px 0'
 }));
-
 var orbitSelect = ui.Select({
   items: [
-    {label: 'Both (All passes)', value: 'BOTH'},
-    {label: 'Ascending only',    value: 'ASCENDING'},
-    {label: 'Descending only',   value: 'DESCENDING'}
+    {label: 'Both passes', value: 'BOTH'},
+    {label: 'Ascending only', value: 'ASCENDING'},
+    {label: 'Descending only', value: 'DESCENDING'}
   ],
-  value: 'BOTH',
-  onChange: function(val) {
-    currentOrbit = val;
-    updateMap();
+  value: currentOrbit,
+  onChange: function(value) {
+    currentOrbit = value;
+    updateApp(false);
   },
-  style: {width: '230px', margin: '4px 0 10px 0'}
-});
-controlPanel.add(orbitSelect);
-
-controlPanel.add(ui.Label('Heatmap Toggle', {
-  fontSize: '12px', fontWeight: 'bold', color: '#555'
-}));
-
-var heatmapCheckbox = ui.Checkbox({
-  label: 'Show Ship Density Heatmap',
-  value: true,
-  onChange: function(checked) {
-    showHeatmap = checked;
-    updateMap();
-  },
-  style: {margin: '4px 0 10px 0'}
-});
-controlPanel.add(heatmapCheckbox);
-
-controlPanel.add(ui.Label('Ship Candidate Detection', {
-  fontSize: '12px', fontWeight: 'bold', color: '#555'
-}));
-
-var detectionInfoLabel = ui.Label(
-  'Orange = ship candidates (threshold=-10)\n' +
-  'Heatmap = cumulative ship density this month',
-  {fontSize: '11px', color: '#777', margin: '2px 0 10px 0', whiteSpace: 'pre'}
-);
-controlPanel.add(detectionInfoLabel);
-
-controlPanel.add(ui.Label('─────────────────────', {
-  fontSize: '11px', color: '#ccc', margin: '0 0 6px 0'
-}));
-
-var statusLabel = ui.Label('Showing: Jan 2023 | Band: VV | Orbit: BOTH', {
-  fontSize: '11px', color: '#444', margin: '0 0 6px 0'
-});
-controlPanel.add(statusLabel);
-
-Map.add(controlPanel);
-
-// -----------------------------
-// 9. 图例面板
-// -----------------------------
-var legendPanel = ui.Panel({
   style: {
-    position: 'bottom-left',
-    padding: '8px 12px',
-    backgroundColor: 'rgba(255,255,255,0.92)'
+    stretch: 'horizontal',
+    margin: '0 0 12px 0',
+    backgroundColor: UI_PANEL_BG_ALT,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER
+  }
+});
+controlsSection.add(orbitSelect);
+
+controlsSection.add(ui.Label('Map layers', {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 4px 0'
+}));
+var sarCheckbox = ui.Checkbox({
+  label: 'SAR composite',
+  value: showSarLayer,
+  onChange: function(value) {
+    showSarLayer = value;
+    updateLayerVisibility();
+  },
+  style: {margin: '0 0 2px 0'}
+});
+var detectionCheckbox = ui.Checkbox({
+  label: 'Ship candidates',
+  value: showDetectionLayer,
+  onChange: function(value) {
+    showDetectionLayer = value;
+    if (value) {
+      currentBand = 'VV';
+    }
+    applyLayerBandConstraints();
+    updateLayerVisibility();
+  },
+  style: {margin: '0 0 2px 0'}
+});
+var heatmapCheckbox = ui.Checkbox({
+  label: 'Density heatmap',
+  value: showHeatmapLayer,
+  onChange: function(value) {
+    showHeatmapLayer = value;
+    if (value) {
+      currentBand = 'VV';
+    }
+    applyLayerBandConstraints();
+    updateLayerVisibility();
+  },
+  style: {margin: '0 0 2px 0'}
+});
+var zonesCheckbox = ui.Checkbox({
+  label: 'Analysis zones',
+  value: showZoneLayer,
+  onChange: function(value) {
+    showZoneLayer = value;
+    updateLayerVisibility();
+  },
+  style: {margin: '0 0 4px 0'}
+});
+controlsSection.add(sarCheckbox);
+controlsSection.add(detectionCheckbox);
+controlsSection.add(heatmapCheckbox);
+controlsSection.add(zonesCheckbox);
+explorerPage.add(controlsSection);
+explorerPage.add(dividerLine());
+
+var summarySection = sectionPanel();
+summarySection.add(sectionTitle('Selected View Statistics'));
+var summaryTable = ui.Panel({
+  style: {stretch: 'horizontal', margin: '0'}
+});
+var summaryMonthRow = makeExplorerStatRow('Month');
+var summaryRegionRow = makeExplorerStatRow('Region');
+var summaryBandRow = makeExplorerStatRow('Band');
+var summaryOrbitRow = makeExplorerStatRow('Orbit');
+var summaryImagesRow = makeExplorerStatRow('Images');
+var summaryMeanVvRow = makeExplorerStatRow('Mean VV');
+var summaryMeanVhRow = makeExplorerStatRow('Mean VH');
+var summaryCandidatesRow = makeExplorerStatRow('Candidate pixels');
+var summaryDensityRow = makeExplorerStatRow('Density sum');
+summaryTable.add(summaryMonthRow.row);
+summaryTable.add(summaryRegionRow.row);
+summaryTable.add(summaryBandRow.row);
+summaryTable.add(summaryOrbitRow.row);
+summaryTable.add(summaryImagesRow.row);
+summaryTable.add(summaryMeanVvRow.row);
+summaryTable.add(summaryMeanVhRow.row);
+summaryTable.add(summaryCandidatesRow.row);
+summaryTable.add(summaryDensityRow.row);
+summarySection.add(summaryTable);
+explorerPage.add(summarySection);
+
+var backSection = sectionPanel();
+var backButton = ui.Button({
+  label: 'Back',
+  onClick: function() {
+    currentPage = 'select';
+    updatePageVisibility();
+  },
+  style: {
+    stretch: 'horizontal',
+    backgroundColor: UI_PANEL_BG_STRONG,
+    color: UI_TEXT_PRIMARY,
+    border: '1px solid ' + UI_BORDER_STRONG
+  }
+});
+backSection.add(backButton);
+explorerPage.add(backSection);
+
+// -----------------------------
+// 9. Map legend and chart dock
+// -----------------------------
+var rightDockPanel = ui.Panel({
+  style: {
+    position: 'bottom-right',
+    width: '270px',
+    padding: '0 0 42px 0',
+    backgroundColor: 'rgba(0, 0, 0, 0)'
   }
 });
 
-legendPanel.add(ui.Label('SAR Backscatter Intensity', {
-  fontSize: '12px', fontWeight: 'bold', color: '#333', margin: '0 0 6px 0'
+var legendPanel = ui.Panel({
+  style: {
+    width: '270px',
+    padding: '8px',
+    margin: '0 0 8px 0',
+    backgroundColor: 'rgba(244, 250, 254, 0.95)',
+    border: '1px solid ' + UI_BORDER
+  }
+});
+legendPanel.add(ui.Label('Map Legend', {
+  fontSize: '13px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 6px 0',
+  textAlign: 'center',
+  stretch: 'horizontal'
 }));
-
-var makeColorBar = function(palette, min, max) {
-  return ui.Thumbnail({
-    image: ee.Image.pixelLonLat().select(0)
-      .multiply((max - min) / 360.0).add(min)
-      .visualize({min: min, max: max, palette: palette}),
-    params: {bbox: '-180,0,180,10', dimensions: '160x12'},
-    style: {margin: '2px 0 4px 0', stretch: 'horizontal'}
-  });
-};
-
-legendPanel.add(makeColorBar(['000000', '0000FF', '00FFFF', 'FFFFFF'], -25, 0));
-
-var legendLabels = ui.Panel({
-  layout: ui.Panel.Layout.flow('horizontal'),
-  style: {margin: '0px', stretch: 'horizontal'}
-});
-legendLabels.add(ui.Label('Low', {fontSize: '10px', color: '#555', margin: '0px'}));
-legendLabels.add(ui.Label('                             High', {fontSize: '10px', color: '#555'}));
-legendPanel.add(legendLabels);
-
-legendPanel.add(ui.Label(' ', {margin: '4px 0 2px 0'}));
-
-var vesselLegend = ui.Panel({
-  layout: ui.Panel.Layout.flow('horizontal'),
-  style: {margin: '2px 0'}
-});
-vesselLegend.add(ui.Label('■', {fontSize: '16px', color: 'FF6600', margin: '0 6px 0 0'}));
-vesselLegend.add(ui.Label('Ship candidate detection', {fontSize: '11px', color: '#555'}));
-legendPanel.add(vesselLegend);
-
-legendPanel.add(ui.Label(' ', {margin: '2px 0 2px 0'}));
-legendPanel.add(ui.Label('Ship Density Heatmap', {
-  fontSize: '12px', fontWeight: 'bold', color: '#333', margin: '4px 0 4px 0'
+legendPanel.add(ui.Label('SAR backscatter', {
+  fontSize: '10px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 2px 0'
 }));
-legendPanel.add(makeColorBar(['FFFF00', 'FF8800', 'FF0000', 'CC0044', '660033'], 1, 10));
-
-var heatmapLabels = ui.Panel({
+legendPanel.add(makeColorBar(SAR_PALETTE, -25, 0, 200));
+var sarLegendLabels = ui.Panel({
   layout: ui.Panel.Layout.flow('horizontal'),
-  style: {margin: '0px', stretch: 'horizontal'}
+  style: {stretch: 'horizontal', margin: '0 0 6px 0'}
 });
-heatmapLabels.add(ui.Label('Low freq.', {fontSize: '10px', color: '#555', margin: '0px'}));
-heatmapLabels.add(ui.Label('                         High freq.', {fontSize: '10px', color: '#555'}));
-legendPanel.add(heatmapLabels);
+sarLegendLabels.add(ui.Label('Low', {fontSize: '10px', color: UI_TEXT_SECONDARY, margin: '0'}));
+sarLegendLabels.add(ui.Label('High', {fontSize: '10px', color: UI_TEXT_SECONDARY, margin: '0 0 0 152px'}));
+legendPanel.add(sarLegendLabels);
 
-legendPanel.add(ui.Label(' ', {margin: '2px 0 2px 0'}));
+var candidateRow = ui.Panel({layout: ui.Panel.Layout.flow('horizontal')});
+candidateRow.add(makeSwatch('#FF7A1A'));
+candidateRow.add(ui.Label('Ship candidate pixels', {
+  fontSize: '10px',
+  color: UI_TEXT_SECONDARY,
+  margin: '2px 0'
+}));
+legendPanel.add(candidateRow);
 
-var borderLegend = ui.Panel({
+legendPanel.add(ui.Label('Ship density frequency', {
+  fontSize: '10px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '6px 0 2px 0'
+}));
+legendPanel.add(makeColorBar(HEATMAP_PALETTE, HEATMAP_VIS_MIN, HEATMAP_VIS_MAX, 200));
+var densityLegendLabels = ui.Panel({
   layout: ui.Panel.Layout.flow('horizontal'),
-  style: {margin: '2px 0'}
+  style: {stretch: 'horizontal', margin: '0'}
 });
-borderLegend.add(ui.Label('■', {fontSize: '16px', color: 'FF0000', margin: '0 6px 0 0'}));
-borderLegend.add(ui.Label('Study area boundary', {fontSize: '11px', color: '#555'}));
-legendPanel.add(borderLegend);
-
-Map.add(legendPanel);
+densityLegendLabels.add(ui.Label('Low', {fontSize: '10px', color: UI_TEXT_SECONDARY, margin: '0'}));
+densityLegendLabels.add(ui.Label('High', {fontSize: '10px', color: UI_TEXT_SECONDARY, margin: '0 0 0 152px'}));
+legendPanel.add(densityLegendLabels);
 
 var chartPanel = ui.Panel({
   style: {
-    position: 'bottom-right',
+    width: '270px',
     padding: '8px',
-    width: '360px',
-    backgroundColor: 'rgba(255,255,255,0.92)'
+    backgroundColor: 'rgba(244, 250, 254, 0.95)',
+    border: '1px solid ' + UI_BORDER
   }
 });
-
-chartPanel.add(ui.Label('Monthly Mean Backscatter (2023)', {
-  fontSize: '12px', fontWeight: 'bold', color: '#333', margin: '0 0 6px 0'
+chartPanel.add(ui.Label('Monthly Trend Charts', {
+  fontSize: '13px',
+  fontWeight: 'bold',
+  color: UI_TEXT_PRIMARY,
+  margin: '0 0 6px 0'
 }));
+var chartPanelNote = ui.Label('Full study area | Both passes | 2023 reference series', {
+  fontSize: '10px',
+  color: UI_TEXT_SECONDARY,
+  margin: '0 0 6px 0'
+});
+chartPanel.add(chartPanelNote);
+var chartsContainer = ui.Panel({
+  style: {stretch: 'horizontal'}
+});
+chartPanel.add(chartsContainer);
 
-var months = ee.List.sequence(1, 12);
+rightDockPanel.add(legendPanel);
+rightDockPanel.add(chartPanel);
+appMap.add(rightDockPanel);
 
-var monthlyMeans = ee.FeatureCollection(
-  months.map(function(m) {
-    m = ee.Number(m);
-    var start = ee.Date.fromYMD(2023, m, 1);
-    var end = start.advance(1, 'month');
-    var monthImg = s1.filterDate(start, end).median().clip(aoi);
+// -----------------------------
+// 10. UI update functions
+// -----------------------------
+function getAnnualReferenceStats() {
+  if (!monthlyChartStatsLoaded) {
+    return null;
+  }
 
-    var meanVV = monthImg.select('VV').reduceRegion({
-      reducer: ee.Reducer.mean(),
-      geometry: aoi,
-      scale: 100,
-      maxPixels: 1e8
-    }).get('VV');
-
-    var meanVH = monthImg.select('VH').reduceRegion({
-      reducer: ee.Reducer.mean(),
-      geometry: aoi,
-      scale: 100,
-      maxPixels: 1e8
-    }).get('VH');
-
-    return ee.Feature(null, {month: m, VV: meanVV, VH: meanVH});
-  })
-);
-
-var timeSeriesChart = ui.Chart.feature.byFeature(monthlyMeans, 'month', ['VV', 'VH'])
-  .setChartType('LineChart')
-  .setOptions({
-    title: '',
-    hAxis: {title: 'Month', ticks: [1,2,3,4,5,6,7,8,9,10,11,12]},
-    vAxis: {title: 'Mean dB'},
-    colors: ['#1a73e8', '#e8711a'],
-    lineWidth: 2,
-    pointSize: 4,
-    legend: {position: 'top'},
-    height: 160
+  var validRows = monthlyChartStats.filter(function(row) {
+    return !!row;
   });
 
-chartPanel.add(timeSeriesChart);
+  if (!validRows.length) {
+    return null;
+  }
 
-chartPanel.add(ui.Label('─────────────────────────', {
-  fontSize: '11px', color: '#ccc', margin: '6px 0 4px 0'
-}));
-chartPanel.add(ui.Label('Monthly Ship Pixel Count (2023)', {
-  fontSize: '12px', fontWeight: 'bold', color: '#333', margin: '0 0 4px 0'
-}));
-chartPanel.add(ui.Label('Computing... This might take a few seconds.', {
-  fontSize: '10px', color: '#999', margin: '0 0 4px 0'
-}));
+  var totalImages = 0;
+  var weightedMeanVv = 0;
+  var weightedMeanVh = 0;
+  var totalCandidates = 0;
+  var totalDensity = 0;
 
-//对月内所有影像做 detectShipBinary，逐像素求和，统计船舶像素总数
-var monthlyShipCounts = ee.FeatureCollection(
-  months.map(function(m) {
-    m = ee.Number(m);
-    var start = ee.Date.fromYMD(2023, m, 1);
-    var end = start.advance(1, 'month');
-    var monthFiltered = s1.filterDate(start, end);
+  validRows.forEach(function(row) {
+    var imageWeight = Number(row.images || 0);
+    totalImages += imageWeight;
 
-    var shipPresence = monthFiltered.map(detectShipBinary);
-    var sumImage = shipPresence.select('ship').sum().clip(aoi);
+    if (row.meanVV !== null && row.meanVV !== undefined) {
+      weightedMeanVv += Number(row.meanVV) * imageWeight;
+    }
 
-    var totalShipPixels = sumImage.reduceRegion({
-      reducer: ee.Reducer.sum(),
-      geometry: aoi,
-      scale: 50,  
-      tileScale: 4, 
-      maxPixels: 1e10 
-    }).get('ship');
+    if (row.meanVH !== null && row.meanVH !== undefined) {
+      weightedMeanVh += Number(row.meanVH) * imageWeight;
+    }
 
-    var imageCount = monthFiltered.size();
+    totalCandidates += Number(row.candidates || 0);
+    totalDensity += Number(row.density || 0);
+  });
 
-    return ee.Feature(null, {
-      month: m,
-      ship_pixels: totalShipPixels,
-      image_count: imageCount
+  return {
+    images: totalImages,
+    meanVV: totalImages ? (weightedMeanVv / totalImages) : null,
+    meanVH: totalImages ? (weightedMeanVh / totalImages) : null,
+    candidates: totalCandidates,
+    density: totalDensity
+  };
+}
+
+function updateOverviewPanel() {
+  if (currentTimeSelection === 'year') {
+    overviewTitle.setValue(YEAR + ' Overview');
+    overviewNote.setValue(
+      'Reference values for the full 2023 period using Full study area and Both passes. Candidate pixels and density sum remain relative indicators rather than validated vessel counts.'
+    );
+  } else {
+    overviewTitle.setValue(getMonthName(currentMonth) + ' ' + YEAR + ' Overview');
+    overviewNote.setValue(
+      'Reference values for ' + getMonthName(currentMonth) + ' ' + YEAR +
+      ' using Full study area and Both passes. Candidate pixels and density sum remain relative indicators rather than validated vessel counts.'
+    );
+  }
+
+  overviewImagesCard.value.setValue('...');
+  overviewMeanVvCard.value.setValue('...');
+  overviewMeanVhCard.value.setValue('...');
+  overviewCandidatesCard.value.setValue('...');
+  overviewDensityCard.value.setValue('...');
+  updateTimeSelectionControls();
+  updateFixedOverviewFromCharts();
+}
+
+function updateBandButtons() {
+  if (currentBand === 'VV') {
+    vvButton.style().set('backgroundColor', UI_PANEL_BG_STRONG);
+    vvButton.style().set('color', UI_TEXT_PRIMARY);
+    vvButton.style().set('border', '1px solid ' + UI_BORDER_STRONG);
+    vvButton.setDisabled(false);
+    if (vhButtonLocked) {
+      vhButton.style().set('backgroundColor', UI_PANEL_BG_DISABLED);
+      vhButton.style().set('color', UI_TEXT_PRIMARY);
+      vhButton.style().set('border', '1px solid ' + UI_BORDER);
+    } else {
+      vhButton.style().set('backgroundColor', UI_PANEL_BG_ALT);
+      vhButton.style().set('color', UI_TEXT_PRIMARY);
+      vhButton.style().set('border', '1px solid ' + UI_BORDER);
+    }
+  } else {
+    vvButton.style().set('backgroundColor', UI_PANEL_BG_ALT);
+    vvButton.style().set('color', UI_TEXT_PRIMARY);
+    vvButton.style().set('border', '1px solid ' + UI_BORDER);
+    vvButton.setDisabled(false);
+    vhButton.style().set('backgroundColor', UI_PANEL_BG_STRONG);
+    vhButton.style().set('color', UI_TEXT_PRIMARY);
+    vhButton.style().set('border', '1px solid ' + UI_BORDER_STRONG);
+  }
+}
+
+function setCurrentMonth(monthNumber) {
+  currentMonth = monthNumber;
+  currentTimeSelection = 'month';
+  updateApp(false);
+}
+
+function updateTimeSelectionControls() {
+  if (currentTimeSelection === 'year') {
+    yearSelectButton.style().set('backgroundColor', UI_PANEL_BG_STRONG);
+    yearSelectButton.style().set('color', UI_TEXT_PRIMARY);
+    yearSelectButton.style().set('border', '1px solid ' + UI_BORDER_STRONG);
+  } else {
+    yearSelectButton.style().set('backgroundColor', UI_PANEL_BG_ALT);
+    yearSelectButton.style().set('color', UI_TEXT_SECONDARY);
+    yearSelectButton.style().set('border', '1px solid ' + UI_BORDER);
+  }
+
+  syncTimeSelectionUi = true;
+  monthSelectDropdown.setValue(currentMonth);
+  syncTimeSelectionUi = false;
+}
+
+function updatePageVisibility() {
+  selectPage.style().set('shown', currentPage === 'select');
+  explorerPage.style().set('shown', currentPage === 'explore');
+}
+
+function applyLayerBandConstraints() {
+  if (syncUiState) {
+    return;
+  }
+
+  syncUiState = true;
+
+  if (currentBand === 'VH') {
+    if (showDetectionLayer) {
+      showDetectionLayer = false;
+      detectionCheckbox.setValue(false);
+    }
+    if (showHeatmapLayer) {
+      showHeatmapLayer = false;
+      heatmapCheckbox.setValue(false);
+    }
+    detectionCheckbox.setDisabled(true);
+    heatmapCheckbox.setDisabled(true);
+    vhButton.setDisabled(false);
+    vhButtonLocked = false;
+  } else {
+    detectionCheckbox.setDisabled(false);
+    heatmapCheckbox.setDisabled(false);
+
+    if (showDetectionLayer || showHeatmapLayer) {
+      if (currentBand !== 'VV') {
+        currentBand = 'VV';
+      }
+      vhButton.setDisabled(true);
+      vhButtonLocked = true;
+    } else {
+      vhButton.setDisabled(false);
+      vhButtonLocked = false;
+    }
+  }
+
+  if (currentBand === 'VV' && !(showDetectionLayer || showHeatmapLayer)) {
+    vhButton.setDisabled(false);
+    vhButtonLocked = false;
+  }
+
+  updateBandButtons();
+  syncUiState = false;
+}
+
+function updateFixedOverviewFromCharts() {
+  var row = currentTimeSelection === 'year' ?
+    getAnnualReferenceStats() :
+    monthlyChartStats[currentMonth - 1];
+
+  if (!row) {
+    overviewImagesCard.value.setValue('...');
+    overviewMeanVvCard.value.setValue('...');
+    overviewMeanVhCard.value.setValue('...');
+    overviewCandidatesCard.value.setValue('...');
+    overviewDensityCard.value.setValue('...');
+
+    if (currentTimeSelection === 'year') {
+      return;
+    }
+
+    fixedOverviewRequestId += 1;
+    var requestId = fixedOverviewRequestId;
+    computeMonthlyStatsForCharts(currentMonth, function(result) {
+      if (requestId !== fixedOverviewRequestId || !result) {
+        return;
+      }
+      monthlyChartStats[currentMonth - 1] = result;
+      updateFixedOverviewFromCharts();
     });
-  })
-);
+    return;
+  }
 
-var shipCountChart = ui.Chart.feature.byFeature(monthlyShipCounts, 'month', ['ship_pixels'])
-  .setChartType('ColumnChart')
-  .setOptions({
-    title: '',
-    hAxis: {title: 'Month', ticks: [1,2,3,4,5,6,7,8,9,10,11,12]},
-    vAxis: {title: 'Relative Ship Pixels'},
-    colors: ['#FF6600'],
-    legend: {position: 'none'},
-    bar: {groupWidth: '70%'},
-    height: 160
+  overviewImagesCard.value.setValue(formatInteger(row.images));
+  overviewMeanVvCard.value.setValue(formatNumber(row.meanVV, 2) + ' dB');
+  overviewMeanVhCard.value.setValue(formatNumber(row.meanVH, 2) + ' dB');
+  overviewCandidatesCard.value.setValue(formatInteger(row.candidates));
+  overviewDensityCard.value.setValue(formatInteger(row.density));
+}
+
+function updateLayerVisibility() {
+  appMap.layers().get(0).setShown(showSarLayer);
+  appMap.layers().get(1).setShown(showHeatmapLayer && currentBand === 'VV');
+  appMap.layers().get(2).setShown(showDetectionLayer && currentBand === 'VV');
+  appMap.layers().get(3).setShown(showZoneLayer);
+  appMap.layers().get(4).setShown(showZoneLayer && currentRegion !== 'ALL');
+  appMap.layers().get(5).setShown(true);
+}
+
+function updateSelectedRegionLayer() {
+  var selectedLayer = emptySingleBandImage('selected');
+
+  if (currentRegion !== 'ALL') {
+    selectedLayer = ee.Image().byte().paint({
+      featureCollection: selectedRegionFeatureCollection(),
+      color: 1,
+      width: 3
+    });
+  }
+
+  appMap.layers().set(4, ui.Map.Layer(
+    selectedLayer,
+    {palette: ['FFFFFF'], opacity: 0.95},
+    'Selected region: ' + regionNameById[currentRegion],
+    showZoneLayer && currentRegion !== 'ALL'
+  ));
+}
+
+function zoomToSelectedRegion() {
+  if (currentRegion === 'ALL') {
+    appMap.centerObject(aoi, 11);
+  } else {
+    appMap.centerObject(selectedRegionGeometry(), 12);
+  }
+}
+
+function updateMapLayers() {
+  currentFilteredCollection = getMonthlyCollection(currentMonth);
+  currentComposite = makeMonthlyComposite(currentFilteredCollection);
+  currentDetectionMask = makeDetectionMask(currentFilteredCollection);
+  currentHeatmap = makeHeatmap(currentFilteredCollection);
+  var displayHeatmap = makeHeatmapDisplay(currentHeatmap);
+
+  var sarVis = currentBand === 'VV' ? vvVis : vhVis;
+
+  appMap.layers().set(0, ui.Map.Layer(
+    currentComposite,
+    sarVis,
+    'SAR ' + currentBand + ' composite - ' + getMonthShortName(currentMonth) + ' ' + YEAR,
+    showSarLayer
+  ));
+
+  appMap.layers().set(1, ui.Map.Layer(
+    displayHeatmap,
+    heatmapVis,
+    'Monthly ship density heatmap - ' + getMonthShortName(currentMonth),
+    showHeatmapLayer && currentBand === 'VV'
+  ));
+
+  appMap.layers().set(2, ui.Map.Layer(
+    currentDetectionMask,
+    detectionVis,
+    'Ship candidate detection - ' + getMonthShortName(currentMonth),
+    showDetectionLayer && currentBand === 'VV'
+  ));
+
+  appMap.layers().set(3, ui.Map.Layer(
+    zoneOutline,
+    {palette: ['00D1FF'], opacity: 0.8},
+    'Analysis zones',
+    showZoneLayer
+  ));
+
+  updateSelectedRegionLayer();
+
+  appMap.layers().set(5, ui.Map.Layer(
+    aoiBorder,
+    {palette: ['FF3B30'], opacity: 0.95},
+    'Study area boundary',
+    true
+  ));
+
+  updateLayerVisibility();
+}
+
+function updateViewSummary() {
+  if (currentRegion === 'ALL' && currentOrbit === 'BOTH' && monthlyChartStatsLoaded) {
+    var fixedRow = monthlyChartStats[currentMonth - 1];
+    if (fixedRow) {
+      summaryMonthRow.value.setValue(getMonthName(currentMonth) + ' ' + YEAR);
+      summaryRegionRow.value.setValue(regionNameById[currentRegion]);
+      summaryBandRow.value.setValue(currentBand);
+      summaryOrbitRow.value.setValue(currentOrbit);
+      summaryImagesRow.value.setValue(formatInteger(fixedRow.images));
+      summaryMeanVvRow.value.setValue(formatNumber(fixedRow.meanVV, 2) + ' dB');
+      summaryMeanVhRow.value.setValue(formatNumber(fixedRow.meanVH, 2) + ' dB');
+      summaryCandidatesRow.value.setValue(formatInteger(fixedRow.candidates));
+      summaryDensityRow.value.setValue(formatInteger(fixedRow.density));
+      return;
+    }
+  }
+
+  summaryMonthRow.value.setValue('Computing...');
+  summaryRegionRow.value.setValue('Computing...');
+  summaryBandRow.value.setValue('Computing...');
+  summaryOrbitRow.value.setValue('Computing...');
+  summaryImagesRow.value.setValue('Computing...');
+  summaryMeanVvRow.value.setValue('Computing...');
+  summaryMeanVhRow.value.setValue('Computing...');
+  summaryCandidatesRow.value.setValue('Computing...');
+  summaryDensityRow.value.setValue('Computing...');
+
+  var regionGeometry = selectedRegionGeometry();
+  var meanBackscatter = currentComposite.select(['VV', 'VH']).reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: regionGeometry,
+    scale: 100,
+    maxPixels: 1e8,
+    tileScale: 4
   });
 
-shipCountChart.onClick(function(xValue) {
-  if (xValue !== null) {
-    currentMonth = Math.round(xValue);
-    monthSelect.setValue(String(currentMonth));
-    updateMap();
+  var shipPixels = currentDetectionMask.unmask(0).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: regionGeometry,
+    scale: 30,
+    maxPixels: 1e8,
+    tileScale: 4
+  }).get('ship');
+
+  var densitySum = currentHeatmap.unmask(0).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: regionGeometry,
+    scale: 60,
+    maxPixels: 1e8,
+    tileScale: 4
+  }).get('ship');
+
+  var summary = ee.Dictionary({
+    image_count: currentFilteredCollection.size(),
+    mean_vv: meanBackscatter.get('VV'),
+    mean_vh: meanBackscatter.get('VH'),
+    ship_pixels: shipPixels,
+    density_sum: densitySum
+  });
+
+  summary.evaluate(function(result) {
+    if (!result) {
+      summaryMonthRow.value.setValue('Unavailable');
+      summaryRegionRow.value.setValue('Unavailable');
+      summaryBandRow.value.setValue('Unavailable');
+      summaryOrbitRow.value.setValue('Unavailable');
+      summaryImagesRow.value.setValue('Unavailable');
+      summaryMeanVvRow.value.setValue('Unavailable');
+      summaryMeanVhRow.value.setValue('Unavailable');
+      summaryCandidatesRow.value.setValue('Unavailable');
+      summaryDensityRow.value.setValue('Unavailable');
+      return;
+    }
+
+    summaryMonthRow.value.setValue(getMonthName(currentMonth) + ' ' + YEAR);
+    summaryRegionRow.value.setValue(regionNameById[currentRegion]);
+    summaryBandRow.value.setValue(currentBand);
+    summaryOrbitRow.value.setValue(currentOrbit);
+    summaryImagesRow.value.setValue(formatInteger(result.image_count));
+    summaryMeanVvRow.value.setValue(formatNumber(result.mean_vv, 2) + ' dB');
+    summaryMeanVhRow.value.setValue(formatNumber(result.mean_vh, 2) + ' dB');
+    summaryCandidatesRow.value.setValue(formatInteger(result.ship_pixels));
+    summaryDensityRow.value.setValue(formatInteger(result.density_sum));
+  });
+}
+
+function computeMonthlyStatsForCharts(monthNumber, callback) {
+  var monthCollection = s1.filterDate(
+    getMonthStart(monthNumber),
+    getMonthEnd(monthNumber)
+  );
+
+  var monthComposite = makeMonthlyComposite(monthCollection);
+  var monthDetection = makeDetectionMask(monthCollection);
+  var monthHeatmap = makeHeatmap(monthCollection);
+
+  var meanBackscatter = monthComposite.select(['VV', 'VH']).reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: aoi,
+    scale: 100,
+    maxPixels: 1e8,
+    tileScale: 4
+  });
+
+  var shipPixels = monthDetection.unmask(0).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: aoi,
+    scale: 30,
+    maxPixels: 1e8,
+    tileScale: 4
+  }).get('ship');
+
+  var densitySum = monthHeatmap.unmask(0).reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: aoi,
+    scale: 60,
+    maxPixels: 1e8,
+    tileScale: 4
+  }).get('ship');
+
+  ee.Dictionary({
+    month: monthNumber,
+    label: getMonthShortName(monthNumber),
+    images: monthCollection.size(),
+    meanVV: meanBackscatter.get('VV'),
+    meanVH: meanBackscatter.get('VH'),
+    candidates: shipPixels,
+    density: densitySum
+  }).evaluate(callback);
+}
+
+function loadMonthlyChartStats() {
+  if (monthlyChartStatsLoaded || monthlyChartStatsLoading) {
+    if (monthlyChartStatsLoaded) {
+      updateCharts();
+    }
+    return;
   }
-});
 
-chartPanel.add(shipCountChart);
+  monthlyChartStatsLoading = true;
+  chartsContainer.clear();
+  chartPanelNote.setValue('Full study area | Both passes | Preparing 2023 reference series...');
 
-Map.add(chartPanel);
+  var results = [];
 
-// -----------------------------
-// 11. 全年累计热点图按钮（右上角）
-// -----------------------------
-var heatmapToolPanel = ui.Panel({
-  style: {
-    position: 'top-right',
-    padding: '10px',
-    width: '220px',
-    backgroundColor: 'rgba(255,255,255,0.92)'
-  }
-});
+  function loadNext(monthNumber) {
+    if (monthNumber > 12) {
+      monthlyChartStats = results;
+      monthlyChartStatsLoaded = true;
+      monthlyChartStatsLoading = false;
+      chartPanelNote.setValue('Full study area | Both passes | 2023 reference series');
+      updateFixedOverviewFromCharts();
+      updateCharts();
+      return;
+    }
 
-heatmapToolPanel.add(ui.Label('Annual Heatmap', {
-  fontSize: '14px', fontWeight: 'bold', color: '#333', margin: '0 0 6px 0'
-}));
-
-heatmapToolPanel.add(ui.Label(
-  'Generate a full-year ship density\nheatmap across all 2023 imagery.',
-  {fontSize: '11px', color: '#666', whiteSpace: 'pre', margin: '0 0 8px 0'}
-));
-
-var annualHeatmapBtn = ui.Button({
-  label: '▶ Build Annual Heatmap',
-  onClick: function() {
-    annualHeatmapBtn.setDisabled(true);
-    annualHeatmapBtn.setLabel('Processing…');
-
-    var annualHeatmap = buildHeatmap(s1);
-
-    Map.layers().set(3,
-      ui.Map.Layer(annualHeatmap.selfMask(),
-        {min: 1, max: 30,
-         palette: ['FFFF00', 'FF8800', 'FF0000', 'CC0044', '660033'],
-         opacity: 0.65},
-        'Annual Ship Density Heatmap 2023')
+    chartPanelNote.setValue(
+      'Full study area | Both passes | Preparing ' +
+      getMonthShortName(monthNumber) + ' ' + YEAR +
+      ' (' + monthNumber + '/12)'
     );
 
-    annualHeatmapBtn.setLabel('✓ Annual Heatmap Loaded');
-    detectionInfoLabel.setValue(
-      'Heatmap showing full-year density.\n' +
-      'Switch month to return to monthly view.'
-    );
-  },
-  style: {width: '200px', backgroundColor: '#1a73e8', color: 'white'}
-});
-heatmapToolPanel.add(annualHeatmapBtn);
+    computeMonthlyStatsForCharts(monthNumber, function(result) {
+      if (!result) {
+        result = {
+          month: monthNumber,
+          label: getMonthShortName(monthNumber),
+          images: 0,
+          meanVV: null,
+          meanVH: null,
+          candidates: 0,
+          density: 0
+        };
+      }
+      results.push(result);
+      monthlyChartStats[monthNumber - 1] = result;
+      loadNext(monthNumber + 1);
+    });
+  }
 
-Map.add(heatmapToolPanel);
+  chartsContainer.add(ui.Label('Preparing reference charts...', {
+    fontSize: '11px',
+    color: UI_TEXT_SECONDARY,
+    margin: '4px 0'
+  }));
+
+  loadNext(1);
+}
+
+function updateCharts() {
+  chartsContainer.clear();
+
+  if (!monthlyChartStatsLoaded) {
+    chartsContainer.add(ui.Label('Preparing reference charts...', {
+      fontSize: '11px',
+      color: UI_TEXT_SECONDARY,
+      margin: '4px 0'
+    }));
+    return;
+  }
+
+  var statsFc = chartStatsFeatureCollection();
+
+  var candidateChart = ui.Chart.feature.byFeature(
+      statsFc,
+      'month',
+      ['candidates']
+    )
+    .setChartType('ColumnChart')
+    .setOptions({
+      title: 'Monthly Ship Candidate Pixels',
+      hAxis: {
+        title: 'Month',
+        ticks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      },
+      vAxis: {
+        title: 'Candidate pixels',
+        viewWindow: {min: 0, max: 1600}
+      },
+      colors: [UI_ACCENT],
+      legend: {position: 'none'},
+      bar: {groupWidth: '70%'},
+      height: 120,
+      chartArea: {left: 42, top: 26, width: '76%', height: '50%'}
+    });
+
+  candidateChart.onClick(function(xValue) {
+    if (xValue !== null && xValue !== undefined) {
+      setCurrentMonth(Math.max(1, Math.min(12, Math.round(xValue))));
+    }
+  });
+
+  var backscatterChart = ui.Chart.feature.byFeature(
+      statsFc,
+      'month',
+      ['meanVV', 'meanVH']
+    )
+    .setChartType('LineChart')
+    .setOptions({
+      title: 'Mean SAR Backscatter',
+      hAxis: {
+        title: 'Month',
+        ticks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      },
+      vAxis: {
+        title: 'Mean dB',
+        viewWindow: {min: -24, max: -12}
+      },
+      colors: [UI_ACCENT_DARK, '#5BA7D1'],
+      lineWidth: 2,
+      pointSize: 4,
+      legend: {position: 'top'},
+      height: 120,
+      chartArea: {left: 42, top: 26, width: '76%', height: '50%'}
+    });
+
+  chartsContainer.add(candidateChart);
+  chartsContainer.add(backscatterChart);
+}
+
+function updateApp(refreshCharts) {
+  updateOverviewPanel();
+  applyLayerBandConstraints();
+  updateBandButtons();
+  updateMapLayers();
+  updateViewSummary();
+
+  if (refreshCharts) {
+    updateCharts();
+  }
+}
 
 // -----------------------------
-// 12. 初始化
+// 11. Initialise app
 // -----------------------------
-updateMap();
+loadMonthlyChartStats();
+updateApp(false);
+updatePageVisibility();

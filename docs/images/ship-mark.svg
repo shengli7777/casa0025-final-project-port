@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Ship icon</title>
+  <desc id="desc">Small blue cargo ship icon for the website title.</desc>
+  <path fill="#d5ecf8" d="M10 66h76v8H10z"/>
+  <path fill="#0f5f8e" d="M18 42h45l10 11h11l-5 17-16 10H31L12 70l3-12h7z"/>
+  <path fill="#8fc6e3" d="M30 34h14v12H30zm18 0h14v12H48z"/>
+  <path fill="#5ba7d1" d="M22 28h10v14H22zm14-6h10v20H36z"/>
+  <circle cx="32" cy="82" r="5" fill="#0f3554"/>
+  <circle cx="60" cy="82" r="5" fill="#0f3554"/>
+  <path fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="5" d="M18 53h8m6 0h8m6 0h8"/>
+</svg>
