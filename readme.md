@@ -71,7 +71,7 @@ The output of Stage 4 is a **ship candidate detection mask**, which serves as th
 
 The interactive GEE application supports:
 
-- **Month slider and navigation buttons** — view SAR composites for any month in 2023
+- **Month navigation** — view SAR composites for different months in 2023
 - **Polarisation toggle** — switch between VV and VH bands
 - **Orbit direction filter** — compare ascending vs descending passes
 - **Layer controls** — independently show or hide the SAR composite, ship candidates, density heatmap, and analysis zones
@@ -86,7 +86,7 @@ The interactive GEE application supports:
 
 ---
 
-## Stage 5 UI / Visualisation Contribution
+## Interactive Application Contribution
 
 The Stage 5 script is implemented in `scripts/app.js`. It turns the Stage 4 detection output into a complete Google Earth Engine app suitable for live demonstration and assessment. The key contribution is the user-facing interaction layer:
 
@@ -121,7 +121,7 @@ casa0025-final-project-port/
 
 ---
 
-```md
+
 ## How to Run the Application
 
 The final interactive application is hosted as a Google Earth Engine App:
