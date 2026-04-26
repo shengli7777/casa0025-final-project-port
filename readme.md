@@ -105,22 +105,83 @@ For the presentation, this section can be demonstrated by selecting a month, swi
 
 ```text
 casa0025-final-project-port/
-├── docs/                          # Rendered website (GitHub Pages)
-│   └── images/
-│       └── monthly_image_count.png
-├── images/
-│   ├── monthly_image_count.png
-│   ├── app_screenshot.png
-│   └── ship_detection_final.png
+├── docs/                          # Rendered website output for GitHub Pages
+├── images/                        # Figures used in README and project website
 ├── scripts/
-│   ├── preprocessing_data.js      # Initial data filtering and compositing
-│   ├── preprocessing_masking.js   # Speckle filter and masking
-│   ├── ship_detection.js          # Ship candidate detection and parameter testing
-│   └── app.js                     # Interactive GEE application script
-├── index.qmd                      # Website source (Quarto)
-├── _quarto.yml                    # Quarto configuration
-└── readme.md
+│   ├── preprocessing_data.js       # Sentinel-1 filtering, orbit counts, and monthly image statistics
+│   ├── preprocessing_masking.js    # Speckle filtering, water masking, and near-shore exclusion
+│   ├── ship_detection.js           # VV threshold-based ship candidate detection and parameter testing
+│   ├── heatmap_mothlyship.js       # Development script for monthly ship-density heatmap logic
+│   └── app.js                      # Final interactive Google Earth Engine application script
+├── index.qmd                       # Quarto website source file
+├── _quarto.yml                     # Quarto website configuration
+├── styles.css                      # Website styling
+└── readme.md                       # Project README
 ```
+
+---
+
+```md
+## How to Run the Application
+
+The final interactive application is hosted as a Google Earth Engine App:
+
+- Live application: [singapore-port-maritime](https://week6-gee-coursework.projects.earthengine.app/view/singapore-port-maritime)
+
+To run the application code manually in Google Earth Engine:
+
+1. Open the Google Earth Engine Code Editor.
+2. Create a new script.
+3. Copy the contents of `scripts/app.js`.
+4. Paste the script into the Code Editor.
+5. Click **Run** to launch the interactive map interface.
+
+The supporting scripts in `scripts/` document the development workflow:
+- `preprocessing_data.js` demonstrates Sentinel-1 filtering and image-count statistics.
+- `preprocessing_masking.js` demonstrates speckle filtering, water masking, and near-shore exclusion.
+- `ship_detection.js` demonstrates threshold-based ship candidate detection and parameter testing.
+- `heatmap_mothlyship.js` documents the monthly ship-density heatmap development logic.
+
+---
+
+## Website Deployment
+
+The project website is built with Quarto and deployed using GitHub Pages.
+
+- `index.qmd` is the source file for the website.
+- `docs/` contains the rendered website output.
+- GitHub Pages is configured to serve the website from the `docs/` folder on the `main` branch.
+
+To update the website:
+
+1. Edit `index.qmd`.
+2. Render the Quarto website.
+3. Commit both the updated `index.qmd` and the updated `docs/` output.
+4. Push the changes to GitHub.
+
+The project website is available at:
+[https://shengli7777.github.io/casa0025-final-project-port/](https://shengli7777.github.io/casa0025-final-project-port/)
+
+---
+
+## Code Walkthrough Guide
+
+The codebase is organised to reflect the analytical workflow from Sentinel-1 imagery to the final interactive application.
+
+1. `preprocessing_data.js`  
+   Defines the study area, filters Sentinel-1 GRD imagery by AOI, date, IW mode, and VV/VH polarisation, and summarises image availability by orbit direction and month.
+
+2. `preprocessing_masking.js`  
+   Applies SAR speckle filtering, water masking, and near-shore exclusion to reduce false detections from land and coastal infrastructure.
+
+3. `ship_detection.js`  
+   Implements the VV-based ship candidate detection method using a threshold-based rule and connected-pixel filtering.
+
+4. `heatmap_mothlyship.js`  
+   Documents the development of monthly ship-density heatmap logic. This script is retained as a supporting development script rather than the primary application entry point.
+
+5. `app.js`  
+   Provides the final user-facing Google Earth Engine application, including map layers, month selection, polarisation switching, orbit filtering, layer controls, summary charts, and interactive visualisation.
 
 ---
 
