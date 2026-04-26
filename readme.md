@@ -141,6 +141,7 @@ The supporting scripts in `scripts/` document the development workflow:
 - `preprocessing_masking.js` demonstrates speckle filtering, water masking, and near-shore exclusion.
 - `ship_detection.js` demonstrates threshold-based ship candidate detection and parameter testing.
 - `heatmap_mothlyship.js` documents the monthly ship-density heatmap development logic.
+```
 
 ---
 
