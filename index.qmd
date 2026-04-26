@@ -132,8 +132,6 @@ function detectShips(image, threshold, minPixels, maxPixels) {
 
 var shipMask = detectShips(detectionComposite, -10, 2, 15);
 
-The resulting ship candidate mask is then integrated into the interactive Earth Engine dashboard. Users can change month, orbit direction, and band, and the application updates the displayed SAR composite and detection layers accordingly. Because the detection workflow is based on filtered VV backscatter, ship candidate layers are displayed in VV mode only.
-
 function updateMap() {
   var composite = getComposite(currentMonth, currentOrbit);
   Map.layers().set(0, ui.Map.Layer(composite, sarVis, 'SAR Composite'));
