@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>readme – Singapore Shipping Activity Dashboard</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -19,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -36,10 +74,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e3866b3096280c29da058bbe07245a78.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-443b18794f898080e8990b9a709c93f1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -98,6 +136,8 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#application-features" id="toc-application-features" class="nav-link" data-scroll-target="#application-features">Application Features</a></li>
   <li><a href="#stage-5-ui-visualisation-contribution" id="toc-stage-5-ui-visualisation-contribution" class="nav-link" data-scroll-target="#stage-5-ui-visualisation-contribution">Stage 5 UI / Visualisation Contribution</a></li>
   <li><a href="#repository-structure" id="toc-repository-structure" class="nav-link" data-scroll-target="#repository-structure">Repository Structure</a></li>
+  <li><a href="#website-deployment" id="toc-website-deployment" class="nav-link" data-scroll-target="#website-deployment">Website Deployment</a></li>
+  <li><a href="#code-walkthrough-guide" id="toc-code-walkthrough-guide" class="nav-link" data-scroll-target="#code-walkthrough-guide">Code Walkthrough Guide</a></li>
   <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
   <li><a href="#tools-and-platforms" id="toc-tools-and-platforms" class="nav-link" data-scroll-target="#tools-and-platforms">Tools and Platforms</a></li>
   </ul></li>
@@ -225,21 +265,73 @@ ul.task-list li input[type="checkbox"] {
 <section id="repository-structure" class="level2">
 <h2 class="anchored" data-anchor-id="repository-structure">Repository Structure</h2>
 <pre class="text"><code>casa0025-final-project-port/
-├── docs/                          # Rendered website (GitHub Pages)
-│   └── images/
-│       └── monthly_image_count.png
-├── images/
-│   ├── monthly_image_count.png
-│   ├── app_screenshot.png
-│   └── ship_detection_final.png
+├── docs/                          # Rendered website output for GitHub Pages
+├── images/                        # Figures used in README and project website
 ├── scripts/
-│   ├── preprocessing_data.js      # Initial data filtering and compositing
-│   ├── preprocessing_masking.js   # Speckle filter and masking
-│   ├── ship_detection.js          # Ship candidate detection and parameter testing
-│   └── app.js                     # Interactive GEE application script
-├── index.qmd                      # Website source (Quarto)
-├── _quarto.yml                    # Quarto configuration
-└── readme.md</code></pre>
+│   ├── preprocessing_data.js       # Sentinel-1 filtering, orbit counts, and monthly image statistics
+│   ├── preprocessing_masking.js    # Speckle filtering, water masking, and near-shore exclusion
+│   ├── ship_detection.js           # VV threshold-based ship candidate detection and parameter testing
+│   ├── heatmap_mothlyship.js       # Development script for monthly ship-density heatmap logic
+│   └── app.js                      # Final interactive Google Earth Engine application script
+├── index.qmd                       # Quarto website source file
+├── _quarto.yml                     # Quarto website configuration
+├── styles.css                      # Website styling
+└── readme.md                       # Project README</code></pre>
+<hr>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode md code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## How to Run the Application</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>The final interactive application is hosted as a Google Earth Engine App:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Live application: <span class="co">[</span><span class="ot">singapore-port-maritime</span><span class="co">](https://week6-gee-coursework.projects.earthengine.app/view/singapore-port-maritime)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>To run the application code manually in Google Earth Engine:</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Open the Google Earth Engine Code Editor.</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Create a new script.</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Copy the contents of <span class="in">`scripts/app.js`</span>.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Paste the script into the Code Editor.</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Click **Run** to launch the interactive map interface.</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>The supporting scripts in <span class="in">`scripts/`</span> document the development workflow:</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`preprocessing_data.js`</span> demonstrates Sentinel-1 filtering and image-count statistics.</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`preprocessing_masking.js`</span> demonstrates speckle filtering, water masking, and near-shore exclusion.</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`ship_detection.js`</span> demonstrates threshold-based ship candidate detection and parameter testing.</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`heatmap_mothlyship.js`</span> documents the monthly ship-density heatmap development logic.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="website-deployment" class="level2">
+<h2 class="anchored" data-anchor-id="website-deployment">Website Deployment</h2>
+<p>The project website is built with Quarto and deployed using GitHub Pages.</p>
+<ul>
+<li><code>index.qmd</code> is the source file for the website.</li>
+<li><code>docs/</code> contains the rendered website output.</li>
+<li>GitHub Pages is configured to serve the website from the <code>docs/</code> folder on the <code>main</code> branch.</li>
+</ul>
+<p>To update the website:</p>
+<ol type="1">
+<li>Edit <code>index.qmd</code>.</li>
+<li>Render the Quarto website.</li>
+<li>Commit both the updated <code>index.qmd</code> and the updated <code>docs/</code> output.</li>
+<li>Push the changes to GitHub.</li>
+</ol>
+<p>The project website is available at: <a href="https://shengli7777.github.io/casa0025-final-project-port/">https://shengli7777.github.io/casa0025-final-project-port/</a></p>
+<hr>
+</section>
+<section id="code-walkthrough-guide" class="level2">
+<h2 class="anchored" data-anchor-id="code-walkthrough-guide">Code Walkthrough Guide</h2>
+<p>The codebase is organised to reflect the analytical workflow from Sentinel-1 imagery to the final interactive application.</p>
+<ol type="1">
+<li><p><code>preprocessing_data.js</code><br>
+Defines the study area, filters Sentinel-1 GRD imagery by AOI, date, IW mode, and VV/VH polarisation, and summarises image availability by orbit direction and month.</p></li>
+<li><p><code>preprocessing_masking.js</code><br>
+Applies SAR speckle filtering, water masking, and near-shore exclusion to reduce false detections from land and coastal infrastructure.</p></li>
+<li><p><code>ship_detection.js</code><br>
+Implements the VV-based ship candidate detection method using a threshold-based rule and connected-pixel filtering.</p></li>
+<li><p><code>heatmap_mothlyship.js</code><br>
+Documents the development of monthly ship-density heatmap logic. This script is retained as a supporting development script rather than the primary application entry point.</p></li>
+<li><p><code>app.js</code><br>
+Provides the final user-facing Google Earth Engine application, including map layers, month selection, polarisation switching, orbit filtering, layer controls, summary charts, and interactive visualisation.</p></li>
+</ol>
 <hr>
 </section>
 <section id="limitations" class="level2">
@@ -270,6 +362,7 @@ ul.task-list li input[type="checkbox"] {
 
 </main> <!-- /main -->
 <script src="toc-active.js"></script>
+
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -321,13 +414,14 @@ ul.task-list li input[type="checkbox"] {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
