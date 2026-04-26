@@ -122,6 +122,10 @@ The VH layer is useful for visual comparison of backscatter, but the ship candid
 
 The application combines SAR preprocessing, rule-based ship candidate detection, and interface-based visual exploration to support interpretation of maritime activity in the Port of Singapore. Its design follows a staged workflow in which raw Sentinel-1 imagery is progressively transformed into interactive map layers, summary statistics, and temporal charts.
 
+![](images/flowchart.png)
+
+Figure: Workflow of the application, from Sentinel-1 preprocessing to ship candidate detection and interactive visualisation.
+
 The first stage prepares the input imagery. Sentinel-1 GRD scenes are filtered to the 2023 study period and the Port of Singapore study area. Because SAR imagery is affected by speckle noise, a 3×3 focal mean filter is applied to smooth local variation while preserving larger spatial structures. The workflow then uses the JRC Global Surface Water dataset to retain open-water pixels and applies a 500 m near-shore exclusion buffer to reduce mixed land–water backscatter and strong coastal clutter. This preprocessing stage creates a cleaner radar surface for subsequent ship candidate extraction.
 
 The second stage identifies ship candidates from the filtered VV backscatter layer. Bright radar returns above a selected threshold are interpreted as potential vessel targets. However, thresholding alone produces many isolated noisy detections, so connected-pixel filtering is used to retain only groups of pixels within a defined size range. In the final configuration, detections are derived using a threshold of **-10 dB**, a minimum connected-pixel size of **2**, and a maximum of **15**. This produces a ship candidate mask that highlights likely vessel-related targets while reducing small speckle artefacts and overly large non-ship reflections.
