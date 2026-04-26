@@ -110,6 +110,14 @@ The interactive application is embedded below. Use the left panel to move from t
 
 {{< include _includes/gee-app.html >}}
 
+### Method and Limitations
+
+Detection uses filtered VV greater than -10 dB, connected groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.
+
+The orange layer shows ship candidates rather than AIS-validated vessels. Strong port infrastructure, near-shore clutter, and fixed thresholds can still create false positives or missed small vessels. Candidate pixels and density sums should therefore be interpreted as relative indicators of maritime activity, not validated vessel counts.
+
+The VH layer is useful for visual comparison of backscatter, but the ship candidate and density heatmap layers are derived from VV. For this reason, the dashboard disables those detection-based layers when VH is selected.
+
 ## How it Works
 
 The application combines SAR preprocessing, rule-based ship candidate detection, and interface-based visual exploration to support interpretation of maritime activity in the Port of Singapore. Its design follows a staged workflow in which raw Sentinel-1 imagery is progressively transformed into interactive map layers, summary statistics, and temporal charts.
@@ -131,7 +139,11 @@ function detectShips(image, threshold, minPixels, maxPixels) {
 }
 
 var shipMask = detectShips(detectionComposite, -10, 2, 15);
+```
 
+The resulting ship candidate mask is then integrated into the interactive Earth Engine dashboard. Users can change month, orbit direction, and band, and the application updates the displayed SAR composite and detection layers accordingly. Because the detection workflow is based on filtered VV backscatter, ship candidate layers are displayed in VV mode only.
+
+```javascript
 function updateMap() {
   var composite = getComposite(currentMonth, currentOrbit);
   Map.layers().set(0, ui.Map.Layer(composite, sarVis, 'SAR Composite'));
@@ -141,11 +153,4 @@ function updateMap() {
     Map.layers().set(1, ui.Map.Layer(shipMask, {palette: ['FF6600']}, 'Ship Candidates'));
   }
 }
-
-### Method and Limitations
-
-Detection uses filtered VV greater than -10 dB, connected groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.
-
-The orange layer shows ship candidates rather than AIS-validated vessels. Strong port infrastructure, near-shore clutter, and fixed thresholds can still create false positives or missed small vessels. Candidate pixels and density sums should therefore be interpreted as relative indicators of maritime activity, not validated vessel counts.
-
-The VH layer is useful for visual comparison of backscatter, but the ship candidate and density heatmap layers are derived from VV. For this reason, the dashboard disables those detection-based layers when VH is selected.
+```
