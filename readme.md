@@ -71,19 +71,15 @@ The output of Stage 4 is a **ship candidate detection mask**, which serves as th
 
 The interactive GEE application supports:
 
-- **Month navigation** — view SAR composites for different months in 2023
-- **Polarisation toggle** — switch between VV and VH bands
-- **Orbit direction filter** — compare ascending vs descending passes
-- **Layer controls** — independently show or hide the SAR composite, ship candidates, density heatmap, and analysis zones
-- **Regional analysis selector** — focus statistics on the full AOI or four interpretable port sub-regions
+- **Overview and month selector** — users first review the 2023 reference overview, then select any month in 2023 to view the corresponding Sentinel-1 median composite and monthly summary
+- **Map Explorer controls** — users can select a region, zoom to the selected area, switch between VV and VH polarisation, choose ascending or descending orbit direction, and toggle map layers
+- **Polarisation toggle** — VV and VH support visual comparison of radar backscatter characteristics; ship candidates and the density heatmap are linked to the VV detection workflow, so those layers are disabled when VH is selected
 - **Ship candidate detection layer** — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering
-- **Current summary panel** — image availability, mean VV/VH, candidate pixels, and density totals for the selected view
-- **Point query** — click the map to return coordinates, zone, VV/VH backscatter, and nearby candidate pixels within 1 km
-- **Linked monthly charts** — mean VV/VH time series and relative ship candidate bars; chart clicks update the map month
-- **Annual heatmap** — on-demand full-year ship density layer for comparing monthly and annual patterns
-- **Map legend** — colour scale for SAR backscatter interpretation
-- **Method and limitations panel** — concise explanation of the detection rule and validation limits
-
+- **Density heatmap** — a smoothed density layer highlights relative concentrations of candidate detections across the port
+- **Selected view statistics** — a summary panel reports the active month, region, band, orbit direction, image count, mean VV, mean VH, candidate pixels, and density sum
+- **Monthly trend charts** — fixed reference charts show the 2023 candidate-pixel series and mean SAR backscatter series for the full study area and both passes
+- **Map legend** — a compact legend explains the SAR backscatter colour ramp, ship candidate layer, and ship density frequency scale
+- **Method and limitations panel** — concise explanation of the detection rule, interpretation limits, and VV-only detection workflow
 ---
 
 ## Interactive Application Contribution
