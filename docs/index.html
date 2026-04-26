@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -107,11 +142,11 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#stage-5-interface-and-analytical-outputs" id="toc-stage-5-interface-and-analytical-outputs" class="nav-link" data-scroll-target="#stage-5-interface-and-analytical-outputs">Stage 5: Interface and Analytical Outputs</a></li>
   <li><a href="#interface" id="toc-interface" class="nav-link" data-scroll-target="#interface">Interface</a></li>
   </ul></li>
-  <li><a href="#the-application" id="toc-the-application" class="nav-link" data-scroll-target="#the-application">The Application</a></li>
-  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it Works</a>
+  <li><a href="#the-application" id="toc-the-application" class="nav-link" data-scroll-target="#the-application">The Application</a>
   <ul class="collapse">
   <li><a href="#method-and-limitations" id="toc-method-and-limitations" class="nav-link" data-scroll-target="#method-and-limitations">Method and Limitations</a></li>
   </ul></li>
+  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it Works</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -219,6 +254,12 @@ ul.task-list li input[type="checkbox"] {
 <p>The interactive application is embedded below. Use the left panel to move from the overview screen into the Map Explorer, then explore maritime activity patterns by month, region, polarisation, orbit direction, and map layer. The right-side legend and monthly charts remain visible on the map to support interpretation during the live demo.</p>
 <iframe class="gee-app-frame" title="Singapore Port Maritime Earth Engine application" src="https://week6-gee-coursework.projects.earthengine.app/view/singapore-port-maritime" allowfullscreen="" loading="lazy">
 </iframe>
+<section id="method-and-limitations" class="level3">
+<h3 class="anchored" data-anchor-id="method-and-limitations">Method and Limitations</h3>
+<p>Detection uses filtered VV greater than -10 dB, connected groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.</p>
+<p>The orange layer shows ship candidates rather than AIS-validated vessels. Strong port infrastructure, near-shore clutter, and fixed thresholds can still create false positives or missed small vessels. Candidate pixels and density sums should therefore be interpreted as relative indicators of maritime activity, not validated vessel counts.</p>
+<p>The VH layer is useful for visual comparison of backscatter, but the ship candidate and density heatmap layers are derived from VV. For this reason, the dashboard disables those detection-based layers when VH is selected.</p>
+</section>
 </section>
 <section id="how-it-works" class="level2">
 <h2 class="anchored" data-anchor-id="how-it-works">How it Works</h2>
@@ -226,18 +267,28 @@ ul.task-list li input[type="checkbox"] {
 <p>The first stage prepares the input imagery. Sentinel-1 GRD scenes are filtered to the 2023 study period and the Port of Singapore study area. Because SAR imagery is affected by speckle noise, a 3×3 focal mean filter is applied to smooth local variation while preserving larger spatial structures. The workflow then uses the JRC Global Surface Water dataset to retain open-water pixels and applies a 500 m near-shore exclusion buffer to reduce mixed land–water backscatter and strong coastal clutter. This preprocessing stage creates a cleaner radar surface for subsequent ship candidate extraction.</p>
 <p>The second stage identifies ship candidates from the filtered VV backscatter layer. Bright radar returns above a selected threshold are interpreted as potential vessel targets. However, thresholding alone produces many isolated noisy detections, so connected-pixel filtering is used to retain only groups of pixels within a defined size range. In the final configuration, detections are derived using a threshold of <code>-10 dB</code>, a minimum connected-pixel size of <code>2</code>, and a maximum of <code>15</code>. This produces a ship candidate mask that highlights likely vessel-related targets while reducing small speckle artefacts and overly large non-ship reflections.</p>
 <p>The third stage integrates these outputs into the interactive Earth Engine application. Users can switch between months, regions, orbit directions, and polarisation bands to compare spatial and temporal patterns. Because the detection workflow is based on filtered VV backscatter, the ship candidate layer and density heatmap are only available in VV mode. Supporting statistics and fixed monthly charts are displayed alongside the map to provide additional context for interpreting relative activity levels across the port.</p>
-<p>```javascript function detectShips(image, threshold, minPixels, maxPixels) { var brightTargets = image.select(‘VV_filtered’).gt(threshold); var connected = brightTargets.connectedPixelCount(100, true); var filtered = brightTargets .updateMask(connected.gte(minPixels)) .updateMask(connected.lte(maxPixels)); return filtered.selfMask(); }</p>
-<p>var shipMask = detectShips(detectionComposite, -10, 2, 15);</p>
-<p>function updateMap() { var composite = getComposite(currentMonth, currentOrbit); Map.layers().set(0, ui.Map.Layer(composite, sarVis, ‘SAR Composite’));</p>
-<p>if (currentBand === ‘VV’) { var shipMask = detectShips(composite, -10, 2, 15); Map.layers().set(1, ui.Map.Layer(shipMask, {palette: [‘FF6600’]}, ‘Ship Candidates’)); } }</p>
-<section id="method-and-limitations" class="level3">
-<h3 class="anchored" data-anchor-id="method-and-limitations">Method and Limitations</h3>
-<p>Detection uses filtered VV greater than -10 dB, connected groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.</p>
-<p>The orange layer shows ship candidates rather than AIS-validated vessels. Strong port infrastructure, near-shore clutter, and fixed thresholds can still create false positives or missed small vessels. Candidate pixels and density sums should therefore be interpreted as relative indicators of maritime activity, not validated vessel counts.</p>
-<p>The VH layer is useful for visual comparison of backscatter, but the ship candidate and density heatmap layers are derived from VV. For this reason, the dashboard disables those detection-based layers when VH is selected.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">detectShips</span>(image<span class="op">,</span> threshold<span class="op">,</span> minPixels<span class="op">,</span> maxPixels) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> brightTargets <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV_filtered'</span>)<span class="op">.</span><span class="fu">gt</span>(threshold)<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> connected <span class="op">=</span> brightTargets<span class="op">.</span><span class="fu">connectedPixelCount</span>(<span class="dv">100</span><span class="op">,</span> <span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> filtered <span class="op">=</span> brightTargets</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">gte</span>(minPixels))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">lte</span>(maxPixels))<span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> filtered<span class="op">.</span><span class="fu">selfMask</span>()<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> shipMask <span class="op">=</span> <span class="fu">detectShips</span>(detectionComposite<span class="op">,</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">15</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The resulting ship candidate mask is then integrated into the interactive Earth Engine dashboard. Users can change month, orbit direction, and band, and the application updates the displayed SAR composite and detection layers accordingly. Because the detection workflow is based on filtered VV backscatter, ship candidate layers are displayed in VV mode only.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">updateMap</span>() {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> composite <span class="op">=</span> <span class="fu">getComposite</span>(currentMonth<span class="op">,</span> currentOrbit)<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">Map</span><span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">0</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(composite<span class="op">,</span> sarVis<span class="op">,</span> <span class="st">'SAR Composite'</span>))<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (currentBand <span class="op">===</span> <span class="st">'VV'</span>) {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> shipMask <span class="op">=</span> <span class="fu">detectShips</span>(composite<span class="op">,</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">15</span>)<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Map</span><span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">1</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(shipMask<span class="op">,</span> {<span class="dt">palette</span><span class="op">:</span> [<span class="st">'FF6600'</span>]}<span class="op">,</span> <span class="st">'Ship Candidates'</span>))<span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
-</section>
 </section>
 </section>
 
