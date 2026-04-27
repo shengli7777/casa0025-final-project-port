@@ -3,8 +3,6 @@ title: "Interactive Analysis of Maritime Activity in the Port of Singapore Using
 bibliography: references.bib
 ---
 
-# Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1
-
 ## Project Summary
 
 ### Problem Statement
