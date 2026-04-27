@@ -61,39 +61,59 @@ The project follows a five-stage processing pipeline implemented in Google Earth
 
 **Stage 4 — Ship Candidate Detection:** Ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels above the selected VV threshold were first identified as bright targets. Connected-pixel filtering was then applied to remove isolated noise and overly large non-ship artefacts. Multiple parameter combinations were tested, including threshold values (-12, -10, -8), minimum connected pixels (1, 2, 3), and maximum connected pixels (10, 15, 25). A final parameter set of **threshold = -10**, **minPixels = 2**, and **maxPixels = 15** was selected as a balanced configuration.
 
-**Stage 5 — Interface and Analytical Outputs:** The detection output from Stage 4 is used as the basis for interactive visualisation and interpretation. This stage integrates the ship candidate layer into the application together with SAR composites, orbit and polarisation controls, layer toggles, regional statistics, linked charts, and point-query outputs. In the current application, the ship candidate detection layer is displayed in VV mode only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.
-
-The output of Stage 4 is a **ship candidate detection mask**, which serves as the input for subsequent visualisation and interpretation in Stage 5.
+The output of Stage 4 is a **ship candidate detection mask**, which serves as the input for subsequent visualisation and interpretation.
 
 ---
 
+## Advanced Analysis
+
+The ship candidate detection result from Stage 4 is used as the basis for interactive visualisation and interpretation. Rather than treating ship candidates as validated vessel counts, the project uses them as relative indicators of maritime activity. These outputs support spatial comparison across port waters and temporal comparison across the 2023 study period.
+
+### Spatial Density Heatmap
+
+The VV-based ship candidate mask is transformed into a smoothed density heatmap to highlight areas where candidate detections occur more frequently. This helps users identify broader maritime activity zones such as anchorage areas, shipping approaches, and busy port waters, rather than focusing only on individual detected pixels.
+
+The density heatmap is displayed in VV mode only, because it is derived from the same filtered VV backscatter workflow as the ship candidate detection layer.
+
+### Temporal Exploration and Analytical Outputs
+
+The application also summarises ship candidate detections and SAR backscatter values across the 2023 study period. Monthly charts show changes in ship candidate pixels and mean VV/VH backscatter, allowing users to compare relative temporal patterns across the year.
+
+These analytical outputs are integrated into the interactive dashboard alongside SAR composites, orbit and polarisation controls, layer toggles, regional statistics, map legends, and monthly trend charts. The ship candidate and density heatmap layers should be interpreted as exploratory indicators of relative maritime activity, not as validated vessel counts.
+
+---
 ## Application Features
 
 The interactive GEE application supports:
 
-- **Overview and month selector** — users first review the 2023 reference overview, then select any month in 2023 to view the corresponding Sentinel-1 median composite and monthly summary
-- **Map Explorer controls** — users can select a region, zoom to the selected area, switch between VV and VH polarisation, choose ascending or descending orbit direction, and toggle map layers
-- **Polarisation toggle** — VV and VH support visual comparison of radar backscatter characteristics; ship candidates and the density heatmap are linked to the VV detection workflow, so those layers are disabled when VH is selected
+- **Overview screen and time selector** — users first review the 2023 reference overview, then select the full-year summary or a specific month before entering the map explorer
+- **Map Explorer navigation** — the **Next** button opens the main map explorer from the overview screen
+- **Region controls** — users can select the full study area or one of four analysis zones: West anchorage, Central harbour, East anchorage, and Southern approach
+- **Zoom to selected region** — users can zoom the map directly to the chosen analysis region
+- **Polarisation controls** — users can switch between VV and VH backscatter for visual comparison; ship candidates and the density heatmap are only available in VV mode
+- **Orbit direction filter** — users can compare both passes, ascending-only imagery, or descending-only imagery
+- **Map layer toggles** — users can turn the SAR composite, ship candidate layer, density heatmap, analysis zones, and study area boundary on or off
 - **Ship candidate detection layer** — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering
 - **Density heatmap** — a smoothed density layer highlights relative concentrations of candidate detections across the port
 - **Selected view statistics** — a summary panel reports the active month, region, band, orbit direction, image count, mean VV, mean VH, candidate pixels, and density sum
 - **Monthly trend charts** — fixed reference charts show the 2023 candidate-pixel series and mean SAR backscatter series for the full study area and both passes
 - **Map legend** — a compact legend explains the SAR backscatter colour ramp, ship candidate layer, and ship density frequency scale
-- **Method and limitations panel** — concise explanation of the detection rule, interpretation limits, and VV-only detection workflow
+
 ---
 
 ## Interactive Application Contribution
 
-The Stage 5 script is implemented in `scripts/app.js`. It turns the Stage 4 detection output into a complete Google Earth Engine app suitable for live demonstration and assessment. The key contribution is the user-facing interaction layer:
+The final application script is implemented in `scripts/app.js`. It integrates the analytical outputs into a complete Google Earth Engine dashboard suitable for live demonstration and assessment. The key contribution is the user-facing interaction layer:
 
-- Built a clean multi-panel Earth Engine interface with controls, legend, summary, point query, and linked charts
-- Added month, polarisation, orbit, region, and layer controls
-- Added regional summaries for west anchorage, central harbour, east anchorage, and southern approach zones
-- Added click-based local inspection using a 1 km buffer around the selected point
-- Added monthly density heatmaps, an on-demand annual heatmap, and chart-to-map linking
-- Added method and limitations text inside the app so users can interpret the outputs responsibly
+- Built a multi-panel Earth Engine interface with an overview screen, map explorer, controls, legend, summary statistics, and linked monthly charts
+- Added month, polarisation, orbit, region, and map-layer controls
+- Added regional summaries for the full study area, west anchorage, central harbour, east anchorage, and southern approach zones
+- Added a zoom-to-region function for the selected analysis zone
+- Added VV-only visibility rules for the ship candidate and density heatmap layers, because the detection workflow is based on VV backscatter
+- Added monthly density heatmaps and fixed 2023 reference charts for ship candidate pixels and mean SAR backscatter
+- Added website documentation so users can interpret the outputs as relative activity indicators rather than validated vessel counts
 
-For the presentation, this section can be demonstrated by selecting a month, switching VV/VH and orbit direction, changing the analysis region, toggling the detection and heatmap layers, clicking a vessel-dense area, and using the monthly bar chart to jump to a different month.
+For the presentation, this section can be demonstrated by selecting a month, switching VV/VH and orbit direction, changing the analysis region, toggling the SAR, ship candidate, density heatmap, and analysis zone layers, and using the monthly charts to explain temporal variation.
 
 ---
 
@@ -102,7 +122,10 @@ For the presentation, this section can be demonstrated by selecting a month, swi
 ```text
 casa0025-final-project-port/
 ├── docs/                          # Rendered website output for GitHub Pages
-├── images/                        # Figures used in README and project website
+├── images/                        # Figures, charts, and screenshots used in the website and README
+├── _includes/
+│   ├── gee-app.html               # Embedded live GEE app iframe
+│   └── toc-active.html            # Loads the active / collapsible contents script
 ├── scripts/
 │   ├── preprocessing_data.js       # Sentinel-1 filtering, orbit counts, and monthly image statistics
 │   ├── preprocessing_masking.js    # Speckle filtering, water masking, and near-shore exclusion
@@ -111,9 +134,10 @@ casa0025-final-project-port/
 │   └── app.js                      # Final interactive Google Earth Engine application script
 ├── index.qmd                       # Quarto website source file
 ├── _quarto.yml                     # Quarto website configuration
+├── references.bib                  # Bibliography records
 ├── styles.css                      # Website styling
+├── toc-active.js                   # Active / collapsible contents sidebar logic
 └── readme.md                       # Project README
-```
 
 ---
 
@@ -177,7 +201,7 @@ The codebase is organised to reflect the analytical workflow from Sentinel-1 ima
    Documents the development of monthly ship-density heatmap logic. This script is retained as a supporting development script rather than the primary application entry point.
 
 5. `app.js`  
-   Provides the final user-facing Google Earth Engine application, including map layers, month selection, polarisation switching, orbit filtering, layer controls, summary charts, and interactive visualisation.
+   Provides the final user-facing Google Earth Engine application, including the overview screen, map explorer, month selection, region selection, zoom-to-region function, polarisation switching, orbit filtering, layer controls, summary statistics, map legend, monthly charts, and VV-only detection-layer visibility rules.
 
 ---
 
