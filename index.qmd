@@ -1,7 +1,9 @@
 ---
-title: "Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1"
 bibliography: references.bib
+csl: apa.csl
 ---
+
+# Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1
 
 ## Project Summary
 
