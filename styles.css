@@ -381,29 +381,43 @@ a {
   }
 }
 
-/* Make the bibliography match the main page styling */
-#refs {
+/* References: remove the white box and match page background */
+#quarto-document-content #refs,
+#quarto-document-content .references,
+#quarto-document-content .csl-bib-body,
+#quarto-document-content .hanging-indent {
   background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  padding: 0 !important;
-  margin-top: 1.2rem !important;
-}
-
-.csl-bib-body {
-  background: transparent !important;
   padding: 0 !important;
   margin: 0 !important;
 }
 
-.csl-entry {
+#quarto-document-content #refs .csl-entry,
+#quarto-document-content .references .csl-entry,
+#quarto-document-content .csl-bib-body .csl-entry,
+#quarto-document-content .hanging-indent .csl-entry {
   background: transparent !important;
-  margin-bottom: 0.85rem;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   padding: 0 !important;
+  margin: 0 0 0.9rem 0 !important;
 }
 
-#refs p,
-#refs div,
-#refs li {
+#quarto-document-content #refs p,
+#quarto-document-content #refs div,
+#quarto-document-content .references p,
+#quarto-document-content .references div,
+#quarto-document-content .csl-bib-body p,
+#quarto-document-content .csl-bib-body div {
   background: transparent !important;
+  background-color: transparent !important;
+}
+
+#quarto-document-content #refs a,
+#quarto-document-content .references a,
+#quarto-document-content .csl-bib-body a {
+  word-break: break-word;
 }
