@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1 – Singapore Shipping Activity Dashboard</title>
+<title>Singapore Shipping Activity Dashboard</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -62,6 +62,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -141,7 +142,9 @@ div.csl-indent {
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#project-summary" id="toc-project-summary" class="nav-link active" data-scroll-target="#project-summary">Project Summary</a>
+  <li><a href="#interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1" id="toc-interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1" class="nav-link active" data-scroll-target="#interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1">Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1</a>
+  <ul class="collapse">
+  <li><a href="#project-summary" id="toc-project-summary" class="nav-link" data-scroll-target="#project-summary">Project Summary</a>
   <ul class="collapse">
   <li><a href="#problem-statement" id="toc-problem-statement" class="nav-link" data-scroll-target="#problem-statement">Problem Statement</a></li>
   <li><a href="#end-user" id="toc-end-user" class="nav-link" data-scroll-target="#end-user">End User</a></li>
@@ -171,31 +174,18 @@ div.csl-indent {
   <li><a href="#interpretation-and-limitations" id="toc-interpretation-and-limitations" class="nav-link" data-scroll-target="#interpretation-and-limitations">4. Interpretation and Limitations</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
 
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
+<section id="interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1" class="level1">
+<h1>Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1</h1>
 <section id="project-summary" class="level2">
 <h2 class="anchored" data-anchor-id="project-summary">Project Summary</h2>
 <section id="problem-statement" class="level3">
@@ -250,7 +240,7 @@ div.csl-indent {
 <section id="stage-3-water-and-land-masking" class="level3">
 <h3 class="anchored" data-anchor-id="stage-3-water-and-land-masking">Stage 3: Water and Land Masking</h3>
 <p>To focus analysis on open water and suppress land-related backscatter, two masking steps were applied:</p>
-<p><strong>Water mask:</strong> The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence <span class="citation" data-cites="gee_jrc_gsw pekel2016surface">(<a href="#ref-gee_jrc_gsw" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-a</a>; <a href="#ref-pekel2016surface" role="doc-biblioref">Pekel et al. 2016</a>)</span>. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.</p>
+<p><strong>Water mask:</strong> The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence <span class="citation" data-cites="gee_jrc_gsw pekel2016surface">(<a href="#ref-gee_jrc_gsw" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-a</a>; <a href="#ref-pekel2016surface" role="doc-biblioref">Pekel et al., 2016</a>)</span>. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.</p>
 <p><strong>Near-shore buffer:</strong> Coastal and near-shore areas produce complex mixed signals where land and water backscatter overlap, leading to high rates of false vessel detections. A 500-metre exclusion buffer was applied around all land boundaries using the USDOS LSIB simplified coastline dataset <span class="citation" data-cites="gee_lsib_simple">(<a href="#ref-gee_lsib_simple" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-b</a>)</span>. Pixels within this buffer zone were removed from the clean output layer.</p>
 </section>
 <section id="stage-4-ship-candidate-detection" class="level3">
@@ -346,25 +336,26 @@ div.csl-indent {
 
 
 </section>
+</section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
 <div id="ref-esa_sentinel1" class="csl-entry" role="listitem">
-European Space Agency. n.d. <em>Sentinel-1</em>.
+European Space Agency. (n.d.). <em>Sentinel-1</em>.
 </div>
 <div id="ref-gee_s1_guide" class="csl-entry" role="listitem">
-Google Earth Engine. n.d. <em>Sentinel-1 Algorithms</em>.
+Google Earth Engine. (n.d.). <em>Sentinel-1 algorithms</em>.
 </div>
 <div id="ref-gee_jrc_gsw" class="csl-entry" role="listitem">
-Google Earth Engine Data Catalog. n.d.-a. <em>JRC Global Surface Water Mapping Layers, V1.4</em>.
+Google Earth Engine Data Catalog. (n.d.-a). <em>JRC global surface water mapping layers, v1.4</em>.
 </div>
 <div id="ref-gee_lsib_simple" class="csl-entry" role="listitem">
-Google Earth Engine Data Catalog. n.d.-b. <em>LSIB 2017: Large Scale International Boundary Polygons, Simplified</em>.
+Google Earth Engine Data Catalog. (n.d.-b). <em>LSIB 2017: Large scale international boundary polygons, simplified</em>.
 </div>
 <div id="ref-gee_s1_grd" class="csl-entry" role="listitem">
-Google Earth Engine Data Catalog. n.d.-c. <em>Sentinel-1 SAR GRD: C-Band Synthetic Aperture Radar Ground Range Detected</em>.
+Google Earth Engine Data Catalog. (n.d.-c). <em>Sentinel-1 SAR GRD: C-band synthetic aperture radar ground range detected</em>.
 </div>
 <div id="ref-pekel2016surface" class="csl-entry" role="listitem">
-Pekel, Jean-François, Andrew Cottam, Noel Gorelick, and Alan S. Belward. 2016. <span>“High-Resolution Mapping of Global Surface Water and Its Long-Term Changes.”</span> <em>Nature</em> 540 (7633): 418–22. <a href="https://www.nature.com/articles/nature20584">https://www.nature.com/articles/nature20584</a>.
+Pekel, J.-F., Cottam, A., Gorelick, N., &amp; Belward, A. S. (2016). High-resolution mapping of global surface water and its long-term changes. <em>Nature</em>, <em>540</em>(7633), 418–422. <a href="https://www.nature.com/articles/nature20584">https://www.nature.com/articles/nature20584</a>
 </div>
 </div></section></div></main> <!-- /main -->
 <script src="toc-active.js"></script>
