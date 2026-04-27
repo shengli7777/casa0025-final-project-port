@@ -91,6 +91,7 @@ The application also supports monthly exploration of maritime activity. Sentinel
 In addition to monthly outputs, the interface includes an optional annual heatmap function. This aggregates ship candidate detections from all 2023 Sentinel-1 images to show full-year detection frequency across the study area. Together, the monthly SAR composites, ship candidate layer, density heatmap, chart-based summaries, and map controls allow users to explore both spatial and temporal patterns of maritime activity in the Port of Singapore.
 
 These outputs should be interpreted as relative indicators of maritime activity rather than validated vessel counts. Since the detections are based on thresholded VV backscatter and have not been validated against AIS or manually labelled ship data, the heatmap and monthly ship pixel totals are most useful for exploratory visual analysis and comparison across space and time.
+
 ---
 
 ### Interface
