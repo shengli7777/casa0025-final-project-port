@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Singapore Shipping Activity Dashboard</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -94,10 +91,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-443b18794f898080e8990b9a709c93f1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-e3866b3096280c29da058bbe07245a78.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -159,9 +156,13 @@ div.csl-indent {
   <li><a href="#stage-2-speckle-filtering" id="toc-stage-2-speckle-filtering" class="nav-link" data-scroll-target="#stage-2-speckle-filtering">Stage 2: Speckle Filtering</a></li>
   <li><a href="#stage-3-water-and-land-masking" id="toc-stage-3-water-and-land-masking" class="nav-link" data-scroll-target="#stage-3-water-and-land-masking">Stage 3: Water and Land Masking</a></li>
   <li><a href="#stage-4-ship-candidate-detection" id="toc-stage-4-ship-candidate-detection" class="nav-link" data-scroll-target="#stage-4-ship-candidate-detection">Stage 4: Ship Candidate Detection</a></li>
-  <li><a href="#stage-5-interface-and-analytical-outputs" id="toc-stage-5-interface-and-analytical-outputs" class="nav-link" data-scroll-target="#stage-5-interface-and-analytical-outputs">Stage 5: Interface and Analytical Outputs</a></li>
-  <li><a href="#interface" id="toc-interface" class="nav-link" data-scroll-target="#interface">Interface</a></li>
   </ul></li>
+  <li><a href="#advanced-analysis" id="toc-advanced-analysis" class="nav-link" data-scroll-target="#advanced-analysis">Advanced Analysis</a>
+  <ul class="collapse">
+  <li><a href="#spatial-density-heatmap" id="toc-spatial-density-heatmap" class="nav-link" data-scroll-target="#spatial-density-heatmap">Spatial Density Heatmap</a></li>
+  <li><a href="#temporal-exploration-and-analytical-outputs" id="toc-temporal-exploration-and-analytical-outputs" class="nav-link" data-scroll-target="#temporal-exploration-and-analytical-outputs">Temporal Exploration and Analytical Outputs</a></li>
+  </ul></li>
+  <li><a href="#interface" id="toc-interface" class="nav-link" data-scroll-target="#interface">Interface</a></li>
   <li><a href="#the-application" id="toc-the-application" class="nav-link" data-scroll-target="#the-application">The Application</a>
   <ul class="collapse">
   <li><a href="#method-and-limitations" id="toc-method-and-limitations" class="nav-link" data-scroll-target="#method-and-limitations">Method and Limitations</a></li>
@@ -198,8 +199,62 @@ div.csl-indent {
 </section>
 <section id="data" class="level3">
 <h3 class="anchored" data-anchor-id="data">Data</h3>
-<p>The project uses Sentinel-1 GRD data from Google Earth Engine <span class="citation" data-cites="gee_s1_grd">(<a href="#ref-gee_s1_grd" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-c</a>)</span>. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.</p>
-<p>A total of <strong>109 Sentinel-1 images</strong> were identified for the study area across 2023, comprising 61 ascending and 48 descending orbit passes. Monthly image counts were calculated to confirm temporal data availability, and the results show relatively stable coverage throughout the year.</p>
+<p>The project uses Sentinel-1 GRD data from Google Earth Engine <span class="citation" data-cites="gee_s1_grd">(<a href="#ref-gee_s1_grd" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-c</a>)</span>. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. For this project, the imagery was filtered to the Port of Singapore and surrounding waters for the 2023 calendar year. Only images acquired in IW mode and containing both VV and VH polarisations were retained.</p>
+<p>The final image collection contains <strong>109 Sentinel-1 images</strong>, including <strong>61 ascending</strong> and <strong>48 descending</strong> orbit passes. Monthly image counts were calculated to confirm temporal data availability, showing relatively stable coverage across the year.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data filtering criterion</th>
+<th>Selection used in this project</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dataset</td>
+<td>Sentinel-1 SAR GRD <span class="citation" data-cites="gee_s1_grd">(<a href="#ref-gee_s1_grd" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-c</a>)</span></td>
+</tr>
+<tr class="even">
+<td>Platform</td>
+<td>Google Earth Engine</td>
+</tr>
+<tr class="odd">
+<td>Study period</td>
+<td>2023-01-01 to 2023-12-31</td>
+</tr>
+<tr class="even">
+<td>Study area</td>
+<td>Port of Singapore and surrounding waters</td>
+</tr>
+<tr class="odd">
+<td>Instrument mode</td>
+<td>IW</td>
+</tr>
+<tr class="even">
+<td>Polarisation bands</td>
+<td>VV and VH</td>
+</tr>
+<tr class="odd">
+<td>Total images</td>
+<td>109</td>
+</tr>
+<tr class="even">
+<td>Ascending passes</td>
+<td>61</td>
+</tr>
+<tr class="odd">
+<td>Descending passes</td>
+<td>48</td>
+</tr>
+<tr class="even">
+<td>Temporal check</td>
+<td>Monthly image counts used to confirm data availability</td>
+</tr>
+</tbody>
+</table>
 <p><img src="images/monthly_image_count.png" class="img-fluid"></p>
 <p>Figure: Monthly Sentinel-1 image count in the study area for 2023.</p>
 </section>
@@ -231,53 +286,355 @@ div.csl-indent {
 <h3 class="anchored" data-anchor-id="stage-1-data-filtering-and-collection">Stage 1: Data Filtering and Collection</h3>
 <p>The study area (AOI) was defined as a rectangular polygon covering the Port of Singapore and surrounding waters (longitude 103.60°E to 104.05°E, latitude 1.15°N to 1.36°N). Sentinel-1 GRD imagery was filtered by this AOI, the 2023 calendar year, IW instrument mode, and the presence of both VV and VH polarisation bands. This produced a collection of 109 images suitable for analysis.</p>
 <p>A median composite image was generated as the baseline output for each time period. The median operator was selected over mean compositing because it is more robust to outliers such as transient bright targets or atmospheric artefacts.</p>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb1"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> YEAR <span class="op">=</span> <span class="dv">2023</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> aoi <span class="op">=</span> ee<span class="op">.</span><span class="at">Geometry</span><span class="op">.</span><span class="fu">Polygon</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  [[[<span class="fl">103.60</span><span class="op">,</span> <span class="fl">1.15</span>]<span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">104.05</span><span class="op">,</span> <span class="fl">1.15</span>]<span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">104.05</span><span class="op">,</span> <span class="fl">1.36</span>]<span class="op">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">103.60</span><span class="op">,</span> <span class="fl">1.36</span>]<span class="op">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">103.60</span><span class="op">,</span> <span class="fl">1.15</span>]]]</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> s1 <span class="op">=</span> ee<span class="op">.</span><span class="fu">ImageCollection</span>(<span class="st">'COPERNICUS/S1_GRD'</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">filterBounds</span>(aoi)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">filterDate</span>(<span class="st">'2023-01-01'</span><span class="op">,</span> <span class="st">'2024-01-01'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">filter</span>(ee<span class="op">.</span><span class="at">Filter</span><span class="op">.</span><span class="fu">eq</span>(<span class="st">'instrumentMode'</span><span class="op">,</span> <span class="st">'IW'</span>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">filter</span>(ee<span class="op">.</span><span class="at">Filter</span><span class="op">.</span><span class="fu">listContains</span>(<span class="st">'transmitterReceiverPolarisation'</span><span class="op">,</span> <span class="st">'VV'</span>))</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">filter</span>(ee<span class="op">.</span><span class="at">Filter</span><span class="op">.</span><span class="fu">listContains</span>(<span class="st">'transmitterReceiverPolarisation'</span><span class="op">,</span> <span class="st">'VH'</span>))<span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">getMonthStart</span>(monthNumber) {</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ee<span class="op">.</span><span class="at">Date</span><span class="op">.</span><span class="fu">fromYMD</span>(YEAR<span class="op">,</span> monthNumber<span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">getMonthEnd</span>(monthNumber) {</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="fu">getMonthStart</span>(monthNumber)<span class="op">.</span><span class="fu">advance</span>(<span class="dv">1</span><span class="op">,</span> <span class="st">'month'</span>)<span class="op">;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">getMonthlyCollection</span>(monthNumber) {</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="fu">filterByOrbit</span>(</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    s1<span class="op">.</span><span class="fu">filterDate</span>(<span class="fu">getMonthStart</span>(monthNumber)<span class="op">,</span> <span class="fu">getMonthEnd</span>(monthNumber))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">makeMonthlyComposite</span>(collection) {</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ee<span class="op">.</span><span class="fu">Image</span>(ee<span class="op">.</span><span class="at">Algorithms</span><span class="op">.</span><span class="fu">If</span>(</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">.</span><span class="fu">size</span>()<span class="op">.</span><span class="fu">gt</span>(<span class="dv">0</span>)<span class="op">,</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">.</span><span class="fu">median</span>()<span class="op">.</span><span class="fu">clip</span>(aoi)<span class="op">,</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">emptySarImage</span>()</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <section id="stage-2-speckle-filtering" class="level3">
 <h3 class="anchored" data-anchor-id="stage-2-speckle-filtering">Stage 2: Speckle Filtering</h3>
 <p>SAR imagery inherently contains speckle noise — a granular, salt-and-pepper texture caused by the coherent nature of radar signals. If left untreated, speckle can produce false positives in vessel detection and reduce the visual interpretability of the imagery.</p>
 <p>A <strong>3×3 focal mean filter</strong> was applied to each image in the collection before compositing. This smooths local pixel variation while preserving the general spatial structure of maritime features such as ship wakes and port infrastructure. The filtered output was compared against the raw composite to verify noise reduction without excessive blurring.</p>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">preprocessForDetection</span>(image) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  image <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(image)<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> vv <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV'</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_mean</span>({</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'square'</span><span class="op">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'pixels'</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">rename</span>(<span class="st">'VV_filtered'</span>)<span class="op">;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> vh <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VH'</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_mean</span>({</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'square'</span><span class="op">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'pixels'</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">rename</span>(<span class="st">'VH_filtered'</span>)<span class="op">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> vv<span class="op">.</span><span class="fu">addBands</span>(vh)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(waterMask)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(openWaterMask)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">copyProperties</span>(image<span class="op">,</span> [<span class="st">'system:time_start'</span><span class="op">,</span> <span class="st">'orbitProperties_pass'</span>])<span class="op">;</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <section id="stage-3-water-and-land-masking" class="level3">
 <h3 class="anchored" data-anchor-id="stage-3-water-and-land-masking">Stage 3: Water and Land Masking</h3>
 <p>To focus analysis on open water and suppress land-related backscatter, two masking steps were applied:</p>
 <p><strong>Water mask:</strong> The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence <span class="citation" data-cites="gee_jrc_gsw pekel2016surface">(<a href="#ref-gee_jrc_gsw" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-a</a>; <a href="#ref-pekel2016surface" role="doc-biblioref">Pekel et al., 2016</a>)</span>. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.</p>
 <p><strong>Near-shore buffer:</strong> Coastal and near-shore areas produce complex mixed signals where land and water backscatter overlap, leading to high rates of false vessel detections. A 500-metre exclusion buffer was applied around all land boundaries using the USDOS LSIB simplified coastline dataset <span class="citation" data-cites="gee_lsib_simple">(<a href="#ref-gee_lsib_simple" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-b</a>)</span>. Pixels within this buffer zone were removed from the clean output layer.</p>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb3"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> waterOccurrence <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(<span class="st">'JRC/GSW1_4/GlobalSurfaceWater'</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">select</span>(<span class="st">'occurrence'</span>)<span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> waterMask <span class="op">=</span> waterOccurrence<span class="op">.</span><span class="fu">gt</span>(<span class="dv">50</span>)<span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> land <span class="op">=</span> ee<span class="op">.</span><span class="fu">FeatureCollection</span>(<span class="st">'USDOS/LSIB_SIMPLE/2017'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">filterBounds</span>(aoi)<span class="op">;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> landImage <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(<span class="dv">0</span>)<span class="op">.</span><span class="fu">byte</span>()<span class="op">.</span><span class="fu">paint</span>(land<span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> coastalBuffer <span class="op">=</span> landImage<span class="op">.</span><span class="fu">focal_max</span>({</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">radius</span><span class="op">:</span> <span class="dv">500</span><span class="op">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'circle'</span><span class="op">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">units</span><span class="op">:</span> <span class="st">'meters'</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> openWaterMask <span class="op">=</span> coastalBuffer<span class="op">.</span><span class="fu">eq</span>(<span class="dv">0</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <section id="stage-4-ship-candidate-detection" class="level3">
 <h3 class="anchored" data-anchor-id="stage-4-ship-candidate-detection">Stage 4: Ship Candidate Detection</h3>
 <p>After preprocessing, ship candidates were extracted from the clean VV backscatter layer using a threshold-based detection approach. Pixels with VV backscatter above a selected threshold were first identified as bright targets. To reduce random noise and non-ship artefacts, connected-pixel filtering was then applied. Very small isolated detections were removed using a minimum connected-pixel threshold, while overly large bright objects were excluded using a maximum connected-pixel threshold.</p>
 <p>Several parameter combinations were tested to evaluate the stability of the detection results, including threshold values (<strong>-12, -10, -8</strong>), minimum connected pixels (<strong>1, 2, 3</strong>), and maximum connected pixels (<strong>10, 15, 25</strong>). Across the selected Singapore test scene, the main offshore ship targets remained relatively stable under these parameter ranges, suggesting that the main detections were driven by consistent high-backscatter targets rather than isolated random noise.</p>
 <p>A final parameter set of <strong>threshold = -10</strong>, <strong>minPixels = 2</strong>, and <strong>maxPixels = 15</strong> was selected as a balanced configuration. This setting preserved the major offshore targets while reducing some near-shore false positives. The output of this stage is a <strong>ship candidate detection mask</strong>, which forms the analytical basis for the following visualisation and interpretation steps.</p>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> DETECTION_THRESHOLD <span class="op">=</span> <span class="op">-</span><span class="dv">10</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> DETECTION_MIN_PIXELS <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> DETECTION_MAX_PIXELS <span class="op">=</span> <span class="dv">15</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">detectShipsFromCleanImage</span>(cleanImage) {</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  cleanImage <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(cleanImage)<span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> brightTargets <span class="op">=</span> cleanImage<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV_filtered'</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">gt</span>(DETECTION_THRESHOLD)<span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> connected <span class="op">=</span> brightTargets<span class="op">.</span><span class="fu">connectedPixelCount</span>(<span class="dv">100</span><span class="op">,</span> <span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> filtered <span class="op">=</span> brightTargets</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">gte</span>(DETECTION_MIN_PIXELS))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">lte</span>(DETECTION_MAX_PIXELS))<span class="op">;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> filtered<span class="op">.</span><span class="fu">selfMask</span>()<span class="op">.</span><span class="fu">rename</span>(<span class="st">'ship'</span>)<span class="op">;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">makeDetectionMask</span>(collection) {</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> cleanCollection <span class="op">=</span> collection<span class="op">.</span><span class="fu">map</span>(preprocessForDetection)<span class="op">;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> cleanComposite <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(ee<span class="op">.</span><span class="at">Algorithms</span><span class="op">.</span><span class="fu">If</span>(</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">.</span><span class="fu">size</span>()<span class="op">.</span><span class="fu">gt</span>(<span class="dv">0</span>)<span class="op">,</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    cleanCollection<span class="op">.</span><span class="fu">median</span>()<span class="op">.</span><span class="fu">clip</span>(aoi)<span class="op">,</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">emptyCleanImage</span>()</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="fu">detectShipsFromCleanImage</span>(cleanComposite)<span class="op">;</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <p><img src="images/ship_detection_final.png" class="img-fluid"></p>
 <p>Figure: Final ship candidate detection result using threshold = -10, minPixels = 2, and maxPixels = 15.</p>
-</section>
-<section id="stage-5-interface-and-analytical-outputs" class="level3">
-<h3 class="anchored" data-anchor-id="stage-5-interface-and-analytical-outputs">Stage 5: Interface and Analytical Outputs</h3>
-<p>The ship candidate detection result from Stage 4 is used as the basis for the interactive application and the subsequent interpretation of maritime activity patterns. Rather than introducing a separate detection method, this stage focuses on transforming the VV-based ship candidate output into more interpretable user-facing layers, summary statistics, and visual analytical tools.</p>
-<p>For each Sentinel-1 image, the detected ship candidate pixels are converted into a binary layer, where candidate pixels are assigned a value of 1 and non-candidate pixels are assigned a value of 0. These binary layers are then summed across the selected image collection to create a ship density heatmap. Areas with higher heatmap values represent locations where ship candidates are detected more frequently, making it easier to identify recurring maritime activity zones such as anchorage areas, shipping lanes, and busy port waters.</p>
-<p>The application also supports monthly exploration of maritime activity. Sentinel-1 images are filtered by month, and the same ship candidate detection output is summarised to calculate monthly ship candidate pixel totals for 2023. These totals are displayed as a column chart, allowing users to compare relative activity levels across months. The chart is linked to the map interface, so selecting a month updates the displayed monthly SAR composite and associated ship activity layers.</p>
-<p>In addition to monthly outputs, the interface includes an optional annual heatmap function. This aggregates ship candidate detections from all 2023 Sentinel-1 images to show full-year detection frequency across the study area. Together, the monthly SAR composites, ship candidate layer, density heatmap, chart-based summaries, and map controls allow users to explore both spatial and temporal patterns of maritime activity in the Port of Singapore.</p>
-<p>These outputs should be interpreted as relative indicators of maritime activity rather than validated vessel counts. Since the detections are based on thresholded VV backscatter and have not been validated against AIS or manually labelled ship data, the heatmap and monthly ship pixel totals are most useful for exploratory visual analysis and comparison across space and time.</p>
 <hr>
 </section>
-<section id="interface" class="level3">
-<h3 class="anchored" data-anchor-id="interface">Interface</h3>
+</section>
+<section id="advanced-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="advanced-analysis">Advanced Analysis</h2>
+<section id="spatial-density-heatmap" class="level3">
+<h3 class="anchored" data-anchor-id="spatial-density-heatmap">Spatial Density Heatmap</h3>
+<p>The ship candidate detection result from Stage 4 is used as the basis for a spatial density analysis of maritime activity. Rather than introducing a separate detection method, this stage transforms the VV-based ship candidate output into a more interpretable user-facing layer for identifying recurring activity zones.</p>
+<p>For each Sentinel-1 image, the detected ship candidate pixels are converted into a binary layer, where candidate pixels are assigned a value of 1 and non-candidate pixels are assigned a value of 0. These binary layers are then summed across the selected image collection to create a ship density heatmap. Areas with higher heatmap values represent locations where ship candidates are detected more frequently, making it easier to identify recurring maritime activity zones such as anchorage areas, shipping lanes, and busy port waters.</p>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">detectShipBinary</span>(image) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  image <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(image)<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> vv <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV'</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_mean</span>({</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'square'</span><span class="op">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'pixels'</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> brightTargets <span class="op">=</span> vv<span class="op">.</span><span class="fu">gt</span>(DETECTION_THRESHOLD)<span class="op">;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> connected <span class="op">=</span> brightTargets<span class="op">.</span><span class="fu">connectedPixelCount</span>(<span class="dv">100</span><span class="op">,</span> <span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> shipMask <span class="op">=</span> brightTargets</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">gte</span>(DETECTION_MIN_PIXELS))</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">lte</span>(DETECTION_MAX_PIXELS))<span class="op">;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> shipMask</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">unmask</span>(<span class="dv">0</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(waterMask)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(openWaterMask)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">unmask</span>(<span class="dv">0</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">rename</span>(<span class="st">'ship'</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">copyProperties</span>(image<span class="op">,</span> [<span class="st">'system:time_start'</span><span class="op">,</span> <span class="st">'orbitProperties_pass'</span>])<span class="op">;</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">makeHeatmap</span>(collection) {</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> heatmap <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(ee<span class="op">.</span><span class="at">Algorithms</span><span class="op">.</span><span class="fu">If</span>(</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">.</span><span class="fu">size</span>()<span class="op">.</span><span class="fu">gt</span>(<span class="dv">0</span>)<span class="op">,</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">.</span><span class="fu">map</span>(detectShipBinary)<span class="op">.</span><span class="fu">select</span>(<span class="st">'ship'</span>)<span class="op">.</span><span class="fu">sum</span>()<span class="op">.</span><span class="fu">clip</span>(aoi)<span class="op">,</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">emptySingleBandImage</span>(<span class="st">'ship'</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> heatmap<span class="op">.</span><span class="fu">rename</span>(<span class="st">'ship'</span>)<span class="op">;</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">makeHeatmapDisplay</span>(heatmap) {</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  heatmap <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(heatmap)<span class="op">;</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> smoothed <span class="op">=</span> heatmap</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_max</span>({</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> HEATMAP_RADIUS_PEAK_METRES<span class="op">,</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'circle'</span><span class="op">,</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'meters'</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_mean</span>({</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> HEATMAP_RADIUS_SPREAD_METRES<span class="op">,</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'circle'</span><span class="op">,</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'meters'</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_mean</span>({</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> HEATMAP_RADIUS_BLEND_METRES<span class="op">,</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'circle'</span><span class="op">,</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'meters'</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">multiply</span>(HEATMAP_VIS_BOOST)<span class="op">;</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> smoothed</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(smoothed<span class="op">.</span><span class="fu">gt</span>(HEATMAP_VIS_MIN))</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">rename</span>(<span class="st">'ship'</span>)<span class="op">;</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><img src="images/spatial_density_heatmap.png" class="img-fluid"></p>
+<p>Figure: Ship density heatmap showing areas with more frequent candidate detections.</p>
+</section>
+<section id="temporal-exploration-and-analytical-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="temporal-exploration-and-analytical-outputs">Temporal Exploration and Analytical Outputs</h3>
+<p>The application also supports monthly exploration of maritime activity. Sentinel-1 images are filtered by month, and the same ship candidate detection output is summarised to calculate monthly ship candidate pixel totals for 2023. These totals are displayed as a column chart, allowing users to compare relative activity levels across months. The chart is linked to the map interface, so selecting a month updates the displayed monthly SAR composite and associated ship activity layers.</p>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb6"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">computeMonthlyStatsForCharts</span>(monthNumber<span class="op">,</span> callback) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> monthCollection <span class="op">=</span> s1<span class="op">.</span><span class="fu">filterDate</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getMonthStart</span>(monthNumber)<span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getMonthEnd</span>(monthNumber)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> monthComposite <span class="op">=</span> <span class="fu">makeMonthlyComposite</span>(monthCollection)<span class="op">;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> monthDetection <span class="op">=</span> <span class="fu">makeDetectionMask</span>(monthCollection)<span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> monthHeatmap <span class="op">=</span> <span class="fu">makeHeatmap</span>(monthCollection)<span class="op">;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> meanBackscatter <span class="op">=</span> monthComposite<span class="op">.</span><span class="fu">select</span>([<span class="st">'VV'</span><span class="op">,</span> <span class="st">'VH'</span>])<span class="op">.</span><span class="fu">reduceRegion</span>({</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">reducer</span><span class="op">:</span> ee<span class="op">.</span><span class="at">Reducer</span><span class="op">.</span><span class="fu">mean</span>()<span class="op">,</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">geometry</span><span class="op">:</span> aoi<span class="op">,</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">scale</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">maxPixels</span><span class="op">:</span> <span class="fl">1e8</span><span class="op">,</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">tileScale</span><span class="op">:</span> <span class="dv">4</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> shipPixels <span class="op">=</span> monthDetection<span class="op">.</span><span class="fu">unmask</span>(<span class="dv">0</span>)<span class="op">.</span><span class="fu">reduceRegion</span>({</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">reducer</span><span class="op">:</span> ee<span class="op">.</span><span class="at">Reducer</span><span class="op">.</span><span class="fu">sum</span>()<span class="op">,</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">geometry</span><span class="op">:</span> aoi<span class="op">,</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">scale</span><span class="op">:</span> <span class="dv">30</span><span class="op">,</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">maxPixels</span><span class="op">:</span> <span class="fl">1e8</span><span class="op">,</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">tileScale</span><span class="op">:</span> <span class="dv">4</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  })<span class="op">.</span><span class="fu">get</span>(<span class="st">'ship'</span>)<span class="op">;</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> densitySum <span class="op">=</span> monthHeatmap<span class="op">.</span><span class="fu">unmask</span>(<span class="dv">0</span>)<span class="op">.</span><span class="fu">reduceRegion</span>({</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">reducer</span><span class="op">:</span> ee<span class="op">.</span><span class="at">Reducer</span><span class="op">.</span><span class="fu">sum</span>()<span class="op">,</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">geometry</span><span class="op">:</span> aoi<span class="op">,</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">scale</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="dt">maxPixels</span><span class="op">:</span> <span class="fl">1e8</span><span class="op">,</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="dt">tileScale</span><span class="op">:</span> <span class="dv">4</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>  })<span class="op">.</span><span class="fu">get</span>(<span class="st">'ship'</span>)<span class="op">;</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>  ee<span class="op">.</span><span class="fu">Dictionary</span>({</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="dt">month</span><span class="op">:</span> monthNumber<span class="op">,</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="fu">getMonthShortName</span>(monthNumber)<span class="op">,</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">images</span><span class="op">:</span> monthCollection<span class="op">.</span><span class="fu">size</span>()<span class="op">,</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="dt">meanVV</span><span class="op">:</span> meanBackscatter<span class="op">.</span><span class="fu">get</span>(<span class="st">'VV'</span>)<span class="op">,</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="dt">meanVH</span><span class="op">:</span> meanBackscatter<span class="op">.</span><span class="fu">get</span>(<span class="st">'VH'</span>)<span class="op">,</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="dt">candidates</span><span class="op">:</span> shipPixels<span class="op">,</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">density</span><span class="op">:</span> densitySum</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>  })<span class="op">.</span><span class="fu">evaluate</span>(callback)<span class="op">;</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">updateCharts</span>() {</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> statsFc <span class="op">=</span> <span class="fu">chartStatsFeatureCollection</span>()<span class="op">;</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> candidateChart <span class="op">=</span> ui<span class="op">.</span><span class="at">Chart</span><span class="op">.</span><span class="at">feature</span><span class="op">.</span><span class="fu">byFeature</span>(</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>      statsFc<span class="op">,</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>      <span class="st">'month'</span><span class="op">,</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>      [<span class="st">'candidates'</span>]</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">setChartType</span>(<span class="st">'ColumnChart'</span>)</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">setOptions</span>({</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>      <span class="dt">title</span><span class="op">:</span> <span class="st">'Monthly Ship Candidate Pixels'</span><span class="op">,</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>      <span class="dt">hAxis</span><span class="op">:</span> {<span class="dt">title</span><span class="op">:</span> <span class="st">'Month'</span>}<span class="op">,</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vAxis</span><span class="op">:</span> {<span class="dt">title</span><span class="op">:</span> <span class="st">'Candidate pixels'</span>}<span class="op">,</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>      <span class="dt">legend</span><span class="op">:</span> {<span class="dt">position</span><span class="op">:</span> <span class="st">'none'</span>}</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> backscatterChart <span class="op">=</span> ui<span class="op">.</span><span class="at">Chart</span><span class="op">.</span><span class="at">feature</span><span class="op">.</span><span class="fu">byFeature</span>(</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>      statsFc<span class="op">,</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>      <span class="st">'month'</span><span class="op">,</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>      [<span class="st">'meanVV'</span><span class="op">,</span> <span class="st">'meanVH'</span>]</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">setChartType</span>(<span class="st">'LineChart'</span>)</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">setOptions</span>({</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>      <span class="dt">title</span><span class="op">:</span> <span class="st">'Mean SAR Backscatter'</span><span class="op">,</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>      <span class="dt">hAxis</span><span class="op">:</span> {<span class="dt">title</span><span class="op">:</span> <span class="st">'Month'</span>}<span class="op">,</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vAxis</span><span class="op">:</span> {<span class="dt">title</span><span class="op">:</span> <span class="st">'Mean dB'</span>}<span class="op">,</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>      <span class="dt">legend</span><span class="op">:</span> {<span class="dt">position</span><span class="op">:</span> <span class="st">'top'</span>}</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>  chartsContainer<span class="op">.</span><span class="fu">add</span>(candidateChart)<span class="op">;</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>  chartsContainer<span class="op">.</span><span class="fu">add</span>(backscatterChart)<span class="op">;</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img src="images/monthly_candidate_pixels.png" class="img-fluid"></p>
+<p>Figure: Monthly ship candidate pixel totals in 2023.</p>
+</div><div class="column" style="width:50%;">
+<p><img src="images/monthly_backscatter_trends.png" class="img-fluid"></p>
+<p>Figure: Monthly mean Sentinel-1 VV and VH backscatter trends in 2023.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="interface" class="level2">
+<h2 class="anchored" data-anchor-id="interface">Interface</h2>
 <p>The interactive application provides the following features for exploring maritime activity in the Port of Singapore:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img src="images/overview_screen.png" class="img-fluid"></p>
+<p>Figure: Overview screen before entering the Map Explorer.</p>
+</div><div class="column" style="width:50%;">
+<p><img src="images/map_explorer_screen.png" class="img-fluid"></p>
+<p>Figure: Map Explorer screen after selecting Next.</p>
+</div>
+</div>
 <ul>
-<li><strong>Overview and month selector</strong>: Users first review the 2023 reference overview, then select any month in 2023 to view the corresponding Sentinel-1 median composite and monthly summary.</li>
-<li><strong>Map Explorer controls</strong>: Users can select a region, zoom to the selected area, switch between VV and VH polarisation, choose ascending or descending orbit direction, and toggle map layers.</li>
-<li><strong>Polarisation toggle</strong>: VV and VH support visual comparison of radar backscatter characteristics. Ship candidates and the density heatmap are linked to the VV detection workflow, so those layers are disabled when VH is selected.</li>
-<li><strong>Ship candidate detection layer</strong>: In VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering, providing an approximate indicator of maritime activity density.</li>
-<li><strong>Density heatmap</strong>: A smoothed density layer highlights relative concentrations of candidate detections across the port, making major maritime activity zones easier to interpret than individual points alone.</li>
-<li><strong>Selected view statistics</strong>: A summary table reports the active month, region, band, orbit direction, image count, mean VV, mean VH, candidate pixels, and density sum.</li>
-<li><strong>Monthly trend charts</strong>: Fixed reference charts show the 2023 candidate-pixel series and mean SAR backscatter series for the full study area and both passes, supporting quick comparison without repeated chart generation delays.</li>
-<li><strong>Map legend</strong>: A compact legend explains the SAR backscatter colour ramp, ship candidate layer, and ship density frequency scale.</li>
+<li><strong>Overview screen and time selector</strong>: Users start with a 2023 overview page showing reference values for the full study area and both orbit passes. They can view the annual summary or choose a specific month before moving into the map explorer.</li>
+<li><strong>Map Explorer navigation</strong>: The <strong>Next</strong> button opens the main Map Explorer, while the <strong>Back</strong> button returns users to the overview screen.</li>
+<li><strong>Region controls</strong>: Users can select the full study area or one of four analysis zones: West anchorage, Central harbour, East anchorage, and Southern approach. The dashboard can zoom directly to the selected region.</li>
+<li><strong>Polarisation controls</strong>: Users can switch between VV and VH backscatter for visual comparison. Detection-based outputs are linked to the VV workflow, so ship candidates and density heatmap layers are only available in VV mode.</li>
+<li><strong>Orbit direction filter</strong>: Users can compare results from both passes, ascending-only imagery, or descending-only imagery.</li>
+<li><strong>Map layer toggles</strong>: Users can turn the SAR composite, ship candidate layer, density heatmap, analysis zones, and study area boundary on or off.</li>
+<li><strong>Ship candidate layer</strong>: In VV mode, candidate ship pixels are displayed as an orange layer using the threshold-based and connected-pixel detection workflow.</li>
+<li><strong>Density heatmap</strong>: The heatmap shows smoothed concentrations of detected candidate pixels, helping users identify recurring maritime activity zones across port waters.</li>
+<li><strong>Selected view statistics</strong>: The summary panel updates for the active month, region, band, and orbit setting. It reports image count, mean VV, mean VH, candidate pixels, and density sum.</li>
+<li><strong>Map legend and monthly charts</strong>: A fixed right-side panel explains SAR backscatter, ship candidate pixels, and density frequency. It also shows monthly reference charts for ship candidate pixels and mean SAR backscatter across 2023.</li>
 </ul>
 <p>Ship candidate detection is currently displayed for the VV band only, because the detection workflow is based on filtered VV backscatter rather than VH imagery.</p>
-<p><img src="images/app_screenshot.png" class="img-fluid"></p>
-<p>Figure: Screenshot of the interactive application showing monthly Sentinel-1 SAR imagery, the ship candidate detection layer in VV mode, the density heatmap, and the monthly trend charts.</p>
 <hr>
-</section>
 </section>
 <section id="the-application" class="level2">
 <h2 class="anchored" data-anchor-id="the-application">The Application</h2>
@@ -304,33 +661,134 @@ div.csl-indent {
 <section id="ship-candidate-detection" class="level3">
 <h3 class="anchored" data-anchor-id="ship-candidate-detection">2. Ship Candidate Detection</h3>
 <p>The second stage identifies ship candidates from the filtered VV backscatter layer. Bright radar returns above a selected threshold are interpreted as potential vessel targets. However, thresholding alone produces many isolated noisy detections, so connected-pixel filtering is used to retain only groups of pixels within a defined size range. In the final configuration, detections are derived using a threshold of <strong>-10 dB</strong>, a minimum connected-pixel size of <strong>2</strong>, and a maximum of <strong>15</strong>. This produces a ship candidate mask that highlights likely vessel-related targets while reducing small speckle artefacts and overly large non-ship reflections.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">detectShips</span>(image<span class="op">,</span> threshold<span class="op">,</span> minPixels<span class="op">,</span> maxPixels) {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> brightTargets <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV_filtered'</span>)<span class="op">.</span><span class="fu">gt</span>(threshold)<span class="op">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> connected <span class="op">=</span> brightTargets<span class="op">.</span><span class="fu">connectedPixelCount</span>(<span class="dv">100</span><span class="op">,</span> <span class="kw">true</span>)<span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> filtered <span class="op">=</span> brightTargets</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">gte</span>(minPixels))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">lte</span>(maxPixels))<span class="op">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> filtered<span class="op">.</span><span class="fu">selfMask</span>()<span class="op">;</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> shipMask <span class="op">=</span> <span class="fu">detectShips</span>(detectionComposite<span class="op">,</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">15</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">preprocessForDetection</span>(image) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  image <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(image)<span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> vv <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV'</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_mean</span>({</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'square'</span><span class="op">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'pixels'</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">rename</span>(<span class="st">'VV_filtered'</span>)<span class="op">;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> vh <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VH'</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">focal_mean</span>({</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">radius</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">kernelType</span><span class="op">:</span> <span class="st">'square'</span><span class="op">,</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>      <span class="dt">units</span><span class="op">:</span> <span class="st">'pixels'</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">rename</span>(<span class="st">'VH_filtered'</span>)<span class="op">;</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> vv<span class="op">.</span><span class="fu">addBands</span>(vh)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(waterMask)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(openWaterMask)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">copyProperties</span>(image<span class="op">,</span> [<span class="st">'system:time_start'</span><span class="op">,</span> <span class="st">'orbitProperties_pass'</span>])<span class="op">;</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">detectShipsFromCleanImage</span>(cleanImage) {</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  cleanImage <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(cleanImage)<span class="op">;</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> brightTargets <span class="op">=</span> cleanImage<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV_filtered'</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">gt</span>(DETECTION_THRESHOLD)<span class="op">;</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> connected <span class="op">=</span> brightTargets<span class="op">.</span><span class="fu">connectedPixelCount</span>(<span class="dv">100</span><span class="op">,</span> <span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> filtered <span class="op">=</span> brightTargets</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">gte</span>(DETECTION_MIN_PIXELS))</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updateMask</span>(connected<span class="op">.</span><span class="fu">lte</span>(DETECTION_MAX_PIXELS))<span class="op">;</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> filtered<span class="op">.</span><span class="fu">selfMask</span>()<span class="op">.</span><span class="fu">rename</span>(<span class="st">'ship'</span>)<span class="op">;</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">makeDetectionMask</span>(collection) {</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> cleanCollection <span class="op">=</span> collection<span class="op">.</span><span class="fu">map</span>(preprocessForDetection)<span class="op">;</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> cleanComposite <span class="op">=</span> ee<span class="op">.</span><span class="fu">Image</span>(ee<span class="op">.</span><span class="at">Algorithms</span><span class="op">.</span><span class="fu">If</span>(</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">.</span><span class="fu">size</span>()<span class="op">.</span><span class="fu">gt</span>(<span class="dv">0</span>)<span class="op">,</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    cleanCollection<span class="op">.</span><span class="fu">median</span>()<span class="op">.</span><span class="fu">clip</span>(aoi)<span class="op">,</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">emptyCleanImage</span>()</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="fu">detectShipsFromCleanImage</span>(cleanComposite)<span class="op">;</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <section id="app-integration-and-visualisation" class="level3">
 <h3 class="anchored" data-anchor-id="app-integration-and-visualisation">3. App Integration and Visualisation</h3>
 <p>The third stage integrates the detection output into the interactive Earth Engine application. Users can switch between months, regions, orbit directions, and polarisation bands to compare spatial and temporal patterns. Because the detection workflow is based on filtered VV backscatter, the ship candidate layer and density heatmap are only available in VV mode. Supporting statistics and fixed monthly charts are displayed alongside the map to provide additional context for interpreting relative activity levels across the port.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">updateMap</span>() {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> composite <span class="op">=</span> <span class="fu">getComposite</span>(currentMonth<span class="op">,</span> currentOrbit)<span class="op">;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">Map</span><span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">0</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(composite<span class="op">,</span> sarVis<span class="op">,</span> <span class="st">'SAR Composite'</span>))<span class="op">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (currentBand <span class="op">===</span> <span class="st">'VV'</span>) {</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> shipMask <span class="op">=</span> <span class="fu">detectShips</span>(composite<span class="op">,</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">15</span>)<span class="op">;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Map</span><span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">1</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(shipMask<span class="op">,</span> {<span class="dt">palette</span><span class="op">:</span> [<span class="st">'FF6600'</span>]}<span class="op">,</span> <span class="st">'Ship Candidates'</span>))<span class="op">;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">updateMapLayers</span>() {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  currentFilteredCollection <span class="op">=</span> <span class="fu">getMonthlyCollection</span>(currentMonth)<span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  currentComposite <span class="op">=</span> <span class="fu">makeMonthlyComposite</span>(currentFilteredCollection)<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  currentDetectionMask <span class="op">=</span> <span class="fu">makeDetectionMask</span>(currentFilteredCollection)<span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  currentHeatmap <span class="op">=</span> <span class="fu">makeHeatmap</span>(currentFilteredCollection)<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> displayHeatmap <span class="op">=</span> <span class="fu">makeHeatmapDisplay</span>(currentHeatmap)<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> sarVis <span class="op">=</span> currentBand <span class="op">===</span> <span class="st">'VV'</span> <span class="op">?</span> vvVis <span class="op">:</span> vhVis<span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">0</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    currentComposite<span class="op">,</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    sarVis<span class="op">,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SAR '</span> <span class="op">+</span> currentBand <span class="op">+</span> <span class="st">' composite - '</span> <span class="op">+</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">getMonthShortName</span>(currentMonth) <span class="op">+</span> <span class="st">' '</span> <span class="op">+</span> YEAR<span class="op">,</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    showSarLayer</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">1</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    displayHeatmap<span class="op">,</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    heatmapVis<span class="op">,</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Monthly ship density heatmap - '</span> <span class="op">+</span> <span class="fu">getMonthShortName</span>(currentMonth)<span class="op">,</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    showHeatmapLayer <span class="op">&amp;&amp;</span> currentBand <span class="op">===</span> <span class="st">'VV'</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">2</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    currentDetectionMask<span class="op">,</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    detectionVis<span class="op">,</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Ship candidate detection - '</span> <span class="op">+</span> <span class="fu">getMonthShortName</span>(currentMonth)<span class="op">,</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    showDetectionLayer <span class="op">&amp;&amp;</span> currentBand <span class="op">===</span> <span class="st">'VV'</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">3</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    zoneOutline<span class="op">,</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">palette</span><span class="op">:</span> [<span class="st">'00D1FF'</span>]<span class="op">,</span> <span class="dt">opacity</span><span class="op">:</span> <span class="fl">0.8</span>}<span class="op">,</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Analysis zones'</span><span class="op">,</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    showZoneLayer</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">updateSelectedRegionLayer</span>()<span class="op">;</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">5</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    aoiBorder<span class="op">,</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">palette</span><span class="op">:</span> [<span class="st">'FF3B30'</span>]<span class="op">,</span> <span class="dt">opacity</span><span class="op">:</span> <span class="fl">0.95</span>}<span class="op">,</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Study area boundary'</span><span class="op">,</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">true</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">updateLayerVisibility</span>()<span class="op">;</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">updateLayerVisibility</span>() {</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">get</span>(<span class="dv">0</span>)<span class="op">.</span><span class="fu">setShown</span>(showSarLayer)<span class="op">;</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">get</span>(<span class="dv">1</span>)<span class="op">.</span><span class="fu">setShown</span>(showHeatmapLayer <span class="op">&amp;&amp;</span> currentBand <span class="op">===</span> <span class="st">'VV'</span>)<span class="op">;</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">get</span>(<span class="dv">2</span>)<span class="op">.</span><span class="fu">setShown</span>(showDetectionLayer <span class="op">&amp;&amp;</span> currentBand <span class="op">===</span> <span class="st">'VV'</span>)<span class="op">;</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">get</span>(<span class="dv">3</span>)<span class="op">.</span><span class="fu">setShown</span>(showZoneLayer)<span class="op">;</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">get</span>(<span class="dv">4</span>)<span class="op">.</span><span class="fu">setShown</span>(showZoneLayer <span class="op">&amp;&amp;</span> currentRegion <span class="op">!==</span> <span class="st">'ALL'</span>)<span class="op">;</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>  appMap<span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">get</span>(<span class="dv">5</span>)<span class="op">.</span><span class="fu">setShown</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <section id="interpretation-and-limitations" class="level3">
 <h3 class="anchored" data-anchor-id="interpretation-and-limitations">4. Interpretation and Limitations</h3>
 <p>The resulting ship candidate layer should be interpreted as an approximate indicator of maritime activity rather than a validated vessel inventory. It has not been validated against AIS or manually labelled vessel data, and some false positives may still remain in complex near-shore environments. For this reason, the app is designed to support exploratory visual analysis and relative comparison across space and time, rather than exact vessel counting.</p>
+<hr>
 </section>
 </section>
 <section id="references" class="level2">
@@ -362,7 +820,6 @@ Pekel, J.-F., Cottam, A., Gorelick, N., &amp; Belward, A. S. (2016). High-resolu
 </div>
 </div></section></div></main> <!-- /main -->
 <script src="toc-active.js"></script>
-
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -414,14 +871,13 @@ Pekel, J.-F., Cottam, A., Gorelick, N., &amp; Belward, A. S. (2016). High-resolu
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
