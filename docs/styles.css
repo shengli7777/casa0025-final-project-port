@@ -63,7 +63,6 @@ main.content {
     margin: calc(var(--hero-height) + var(--hero-gap)) 0 0 0 !important;
     padding-top: 0;
     align-self: flex-start;
-
     position: sticky !important;
     top: 4rem !important;
     height: fit-content !important;
@@ -200,7 +199,6 @@ main.content {
   box-shadow: inset 2px 0 0 #8ec9e3;
 }
 
-/* Collapse right TOC when it reaches the GEE dashboard */
 @media (min-width: 992px) {
   body.toc-docked #quarto-margin-sidebar {
     position: sticky !important;
