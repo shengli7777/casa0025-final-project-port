@@ -419,3 +419,49 @@ a {
 #quarto-document-content .csl-bib-body a {
   word-break: break-word;
 }
+
+/* Force Quarto appendix/references area to blend into page */
+#quarto-appendix,
+#quarto-appendix.default,
+#quarto-appendix.quarto-appendix-default,
+#quarto-document-content #quarto-appendix,
+#quarto-document-content .quarto-appendix-default,
+#quarto-document-content .quarto-appendix-contents {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 2rem 0 0 0 !important;
+}
+
+#quarto-appendix .quarto-appendix-heading,
+#quarto-appendix .quarto-appendix-contents,
+#quarto-appendix #refs,
+#quarto-appendix .references,
+#quarto-appendix .csl-bib-body,
+#quarto-appendix .hanging-indent {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+#quarto-appendix .csl-entry,
+#quarto-appendix #refs .csl-entry {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 0 0.9rem 0 !important;
+}
+
+#quarto-appendix p,
+#quarto-appendix div,
+#quarto-appendix li,
+#quarto-appendix span {
+  background: transparent !important;
+  background-color: transparent !important;
+}
