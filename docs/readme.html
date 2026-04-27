@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>readme – Singapore Shipping Activity Dashboard</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -22,41 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -74,10 +36,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-443b18794f898080e8990b9a709c93f1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-e3866b3096280c29da058bbe07245a78.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -134,8 +96,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a></li>
   <li><a href="#application-features" id="toc-application-features" class="nav-link" data-scroll-target="#application-features">Application Features</a></li>
-  <li><a href="#stage-5-ui-visualisation-contribution" id="toc-stage-5-ui-visualisation-contribution" class="nav-link" data-scroll-target="#stage-5-ui-visualisation-contribution">Stage 5 UI / Visualisation Contribution</a></li>
+  <li><a href="#interactive-application-contribution" id="toc-interactive-application-contribution" class="nav-link" data-scroll-target="#interactive-application-contribution">Interactive Application Contribution</a></li>
   <li><a href="#repository-structure" id="toc-repository-structure" class="nav-link" data-scroll-target="#repository-structure">Repository Structure</a></li>
+  <li><a href="#how-to-run-the-application" id="toc-how-to-run-the-application" class="nav-link" data-scroll-target="#how-to-run-the-application">How to Run the Application</a></li>
   <li><a href="#website-deployment" id="toc-website-deployment" class="nav-link" data-scroll-target="#website-deployment">Website Deployment</a></li>
   <li><a href="#code-walkthrough-guide" id="toc-code-walkthrough-guide" class="nav-link" data-scroll-target="#code-walkthrough-guide">Code Walkthrough Guide</a></li>
   <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
@@ -233,23 +196,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="application-features">Application Features</h2>
 <p>The interactive GEE application supports:</p>
 <ul>
-<li><strong>Month slider and navigation buttons</strong> — view SAR composites for any month in 2023</li>
-<li><strong>Polarisation toggle</strong> — switch between VV and VH bands</li>
-<li><strong>Orbit direction filter</strong> — compare ascending vs descending passes</li>
-<li><strong>Layer controls</strong> — independently show or hide the SAR composite, ship candidates, density heatmap, and analysis zones</li>
-<li><strong>Regional analysis selector</strong> — focus statistics on the full AOI or four interpretable port sub-regions</li>
+<li><strong>Overview and month selector</strong> — users first review the 2023 reference overview, then select any month in 2023 to view the corresponding Sentinel-1 median composite and monthly summary</li>
+<li><strong>Map Explorer controls</strong> — users can select a region, zoom to the selected area, switch between VV and VH polarisation, choose ascending or descending orbit direction, and toggle map layers</li>
+<li><strong>Polarisation toggle</strong> — VV and VH support visual comparison of radar backscatter characteristics; ship candidates and the density heatmap are linked to the VV detection workflow, so those layers are disabled when VH is selected</li>
 <li><strong>Ship candidate detection layer</strong> — in VV mode, threshold-based ship candidates are displayed using connected-pixel and size filtering</li>
-<li><strong>Current summary panel</strong> — image availability, mean VV/VH, candidate pixels, and density totals for the selected view</li>
-<li><strong>Point query</strong> — click the map to return coordinates, zone, VV/VH backscatter, and nearby candidate pixels within 1 km</li>
-<li><strong>Linked monthly charts</strong> — mean VV/VH time series and relative ship candidate bars; chart clicks update the map month</li>
-<li><strong>Annual heatmap</strong> — on-demand full-year ship density layer for comparing monthly and annual patterns</li>
-<li><strong>Map legend</strong> — colour scale for SAR backscatter interpretation</li>
-<li><strong>Method and limitations panel</strong> — concise explanation of the detection rule and validation limits</li>
+<li><strong>Density heatmap</strong> — a smoothed density layer highlights relative concentrations of candidate detections across the port</li>
+<li><strong>Selected view statistics</strong> — a summary panel reports the active month, region, band, orbit direction, image count, mean VV, mean VH, candidate pixels, and density sum</li>
+<li><strong>Monthly trend charts</strong> — fixed reference charts show the 2023 candidate-pixel series and mean SAR backscatter series for the full study area and both passes</li>
+<li><strong>Map legend</strong> — a compact legend explains the SAR backscatter colour ramp, ship candidate layer, and ship density frequency scale</li>
+<li><h2 id="method-and-limitations-panel-concise-explanation-of-the-detection-rule-interpretation-limits-and-vv-only-detection-workflow" class="anchored"><strong>Method and limitations panel</strong> — concise explanation of the detection rule, interpretation limits, and VV-only detection workflow</h2></li>
 </ul>
-<hr>
 </section>
-<section id="stage-5-ui-visualisation-contribution" class="level2">
-<h2 class="anchored" data-anchor-id="stage-5-ui-visualisation-contribution">Stage 5 UI / Visualisation Contribution</h2>
+<section id="interactive-application-contribution" class="level2">
+<h2 class="anchored" data-anchor-id="interactive-application-contribution">Interactive Application Contribution</h2>
 <p>The Stage 5 script is implemented in <code>scripts/app.js</code>. It turns the Stage 4 detection output into a complete Google Earth Engine app suitable for live demonstration and assessment. The key contribution is the user-facing interaction layer:</p>
 <ul>
 <li>Built a clean multi-panel Earth Engine interface with controls, legend, summary, point query, and linked charts</li>
@@ -278,25 +237,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ├── styles.css                      # Website styling
 └── readme.md                       # Project README</code></pre>
 <hr>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode md code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## How to Run the Application</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>The final interactive application is hosted as a Google Earth Engine App:</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Live application: <span class="co">[</span><span class="ot">singapore-port-maritime</span><span class="co">](https://week6-gee-coursework.projects.earthengine.app/view/singapore-port-maritime)</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>To run the application code manually in Google Earth Engine:</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Open the Google Earth Engine Code Editor.</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Create a new script.</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Copy the contents of <span class="in">`scripts/app.js`</span>.</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Paste the script into the Code Editor.</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Click **Run** to launch the interactive map interface.</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>The supporting scripts in <span class="in">`scripts/`</span> document the development workflow:</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`preprocessing_data.js`</span> demonstrates Sentinel-1 filtering and image-count statistics.</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`preprocessing_masking.js`</span> demonstrates speckle filtering, water masking, and near-shore exclusion.</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`ship_detection.js`</span> demonstrates threshold-based ship candidate detection and parameter testing.</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`heatmap_mothlyship.js`</span> documents the monthly ship-density heatmap development logic.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="how-to-run-the-application" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-run-the-application">How to Run the Application</h2>
+<p>The final interactive application is hosted as a Google Earth Engine App:</p>
+<ul>
+<li>Live application: <a href="https://week6-gee-coursework.projects.earthengine.app/view/singapore-port-maritime">singapore-port-maritime</a></li>
+</ul>
+<p>To run the application code manually in Google Earth Engine:</p>
+<ol type="1">
+<li>Open the Google Earth Engine Code Editor.</li>
+<li>Create a new script.</li>
+<li>Copy the contents of <code>scripts/app.js</code>.</li>
+<li>Paste the script into the Code Editor.</li>
+<li>Click <strong>Run</strong> to launch the interactive map interface.</li>
+</ol>
+<p>The supporting scripts in <code>scripts/</code> document the development workflow: - <code>preprocessing_data.js</code> demonstrates Sentinel-1 filtering and image-count statistics. - <code>preprocessing_masking.js</code> demonstrates speckle filtering, water masking, and near-shore exclusion. - <code>ship_detection.js</code> demonstrates threshold-based ship candidate detection and parameter testing. - <code>heatmap_mothlyship.js</code> documents the monthly ship-density heatmap development logic.</p>
 <hr>
 </section>
 <section id="website-deployment" class="level2">
@@ -362,7 +318,6 @@ Provides the final user-facing Google Earth Engine application, including map la
 
 </main> <!-- /main -->
 <script src="toc-active.js"></script>
-
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -414,14 +369,13 @@ Provides the final user-facing Google Earth Engine application, including map la
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

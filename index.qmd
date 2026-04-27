@@ -108,6 +108,8 @@ Figure: Screenshot of the interactive application showing monthly Sentinel-1 SAR
 
 The interactive application is embedded below. Use the left panel to move from the overview screen into the Map Explorer, then explore maritime activity patterns by month, region, polarisation, orbit direction, and map layer. The right-side legend and monthly charts remain visible on the map to support interpretation during the live demo.
 
+[**Live Application: singapore-port-maritime**](https://week6-gee-coursework.projects.earthengine.app/view/singapore-port-maritime)
+
 {{< include _includes/gee-app.html >}}
 
 ### Method and Limitations

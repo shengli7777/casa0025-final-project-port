@@ -75,9 +75,61 @@
     window.setTimeout(updateToc, 250);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSectionToc);
-  } else {
+  function initDockedToc() {
+    var dashboard = document.querySelector('.gee-app-frame');
+    var sidebar = document.querySelector('#quarto-margin-sidebar');
+    var toc = document.querySelector('#quarto-margin-sidebar nav#TOC');
+    var tocTitle = document.querySelector('#quarto-margin-sidebar nav#TOC #toc-title');
+
+    if (!dashboard || !sidebar || !toc || !tocTitle) return;
+
+    function updateDockState() {
+      var rect = dashboard.getBoundingClientRect();
+
+      var dashboardIsActive =
+        rect.top <= 120 &&
+        rect.bottom > 120;
+
+      if (dashboardIsActive) {
+        document.body.classList.add('toc-docked');
+      } else {
+        document.body.classList.remove('toc-docked');
+        document.body.classList.remove('toc-open');
+      }
+    }
+
+    tocTitle.addEventListener('click', function (event) {
+      if (document.body.classList.contains('toc-docked')) {
+        event.preventDefault();
+        event.stopPropagation();
+        document.body.classList.toggle('toc-open');
+      }
+    });
+
+    document.addEventListener('click', function (event) {
+      if (
+        document.body.classList.contains('toc-docked') &&
+        document.body.classList.contains('toc-open') &&
+        !toc.contains(event.target)
+      ) {
+        document.body.classList.remove('toc-open');
+      }
+    });
+
+    window.addEventListener('scroll', updateDockState, { passive: true });
+    window.addEventListener('resize', updateDockState);
+
+    updateDockState();
+  }
+
+  function initAll() {
     initSectionToc();
+    initDockedToc();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
   }
 })();
