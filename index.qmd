@@ -1,3 +1,8 @@
+---
+title: "Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1"
+bibliography: references.bib
+---
+
 # Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1
 
 ## Project Summary
@@ -12,7 +17,7 @@ This application is designed for students, researchers, and users interested in 
 
 ### Data
 
-The project uses Sentinel-1 GRD data from Google Earth Engine. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.
+The project uses Sentinel-1 GRD data from Google Earth Engine [@gee_s1_grd]. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.
 
 A total of **109 Sentinel-1 images** were identified for the study area across 2023, comprising 61 ascending and 48 descending orbit passes. Monthly image counts were calculated to confirm temporal data availability, and the results show relatively stable coverage throughout the year.
 
@@ -22,7 +27,7 @@ Figure: Monthly Sentinel-1 image count in the study area for 2023.
 
 ### Why Sentinel-1?
 
-Sentinel-1 was selected because SAR imagery is particularly suitable for maritime monitoring. Unlike optical imagery, it is unaffected by cloud cover and lighting conditions, making it well suited to busy coastal and port environments. The VV polarisation channel is sensitive to surface roughness and large metallic structures such as ship hulls, while VH captures volume scattering and can help distinguish between vessel types and background clutter.
+Sentinel-1 was selected because SAR imagery is particularly suitable for maritime monitoring. Unlike optical imagery, it is unaffected by cloud cover and lighting conditions, making it well suited to busy coastal and port environments [@esa_sentinel1; @gee_s1_grd]. The VV polarisation channel is sensitive to surface roughness and large metallic structures such as ship hulls, while VH captures volume scattering and can help distinguish between vessel types and background clutter.
 
 ### Limitations
 
@@ -59,9 +64,9 @@ A **3×3 focal mean filter** was applied to each image in the collection before 
 
 To focus analysis on open water and suppress land-related backscatter, two masking steps were applied:
 
-**Water mask:** The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.
+**Water mask:** The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence [@gee_jrc_gsw; @pekel2016surface]. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.
 
-**Near-shore buffer:** Coastal and near-shore areas produce complex mixed signals where land and water backscatter overlap, leading to high rates of false vessel detections. A 500-metre exclusion buffer was applied around all land boundaries using the USDOS LSIB simplified coastline dataset. Pixels within this buffer zone were removed from the clean output layer.
+**Near-shore buffer:** Coastal and near-shore areas produce complex mixed signals where land and water backscatter overlap, leading to high rates of false vessel detections. A 500-metre exclusion buffer was applied around all land boundaries using the USDOS LSIB simplified coastline dataset [@gee_lsib_simple]. Pixels within this buffer zone were removed from the clean output layer.
 
 ### Stage 4: Ship Candidate Detection
 
@@ -114,7 +119,7 @@ The interactive application is embedded below. Use the left panel to move from t
 
 ### Method and Limitations
 
-Detection uses filtered VV greater than -10 dB, connected groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.
+Detection uses filtered VV backscatter greater than -10 dB, connected-pixel groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.
 
 The orange layer shows ship candidates rather than AIS-validated vessels. Strong port infrastructure, near-shore clutter, and fixed thresholds can still create false positives or missed small vessels. Candidate pixels and density sums should therefore be interpreted as relative indicators of maritime activity, not validated vessel counts.
 
@@ -128,11 +133,13 @@ The application combines SAR preprocessing, rule-based ship candidate detection,
 
 Figure: Workflow of the application, from Sentinel-1 preprocessing to ship candidate detection and interactive visualisation.
 
-The first stage prepares the input imagery. Sentinel-1 GRD scenes are filtered to the 2023 study period and the Port of Singapore study area. Because SAR imagery is affected by speckle noise, a 3×3 focal mean filter is applied to smooth local variation while preserving larger spatial structures. The workflow then uses the JRC Global Surface Water dataset to retain open-water pixels and applies a 500 m near-shore exclusion buffer to reduce mixed land–water backscatter and strong coastal clutter. This preprocessing stage creates a cleaner radar surface for subsequent ship candidate extraction.
+### 1. Preprocessing
+
+The first stage prepares the input imagery. Sentinel-1 GRD scenes are filtered to the 2023 study period and the Port of Singapore study area. Because SAR imagery is affected by speckle noise, a 3×3 focal mean filter is applied to smooth local variation while preserving larger spatial structures. The workflow then uses the JRC Global Surface Water dataset to retain open-water pixels and applies a 500 m near-shore exclusion buffer to reduce mixed land–water backscatter and strong coastal clutter. This preprocessing stage creates a cleaner radar surface for subsequent ship candidate extraction and follows the use of Earth Engine catalogue datasets for Sentinel-1 handling, water masking, and coastal exclusion [@gee_s1_guide; @gee_jrc_gsw; @gee_lsib_simple].
+
+### 2. Ship Candidate Detection
 
 The second stage identifies ship candidates from the filtered VV backscatter layer. Bright radar returns above a selected threshold are interpreted as potential vessel targets. However, thresholding alone produces many isolated noisy detections, so connected-pixel filtering is used to retain only groups of pixels within a defined size range. In the final configuration, detections are derived using a threshold of **-10 dB**, a minimum connected-pixel size of **2**, and a maximum of **15**. This produces a ship candidate mask that highlights likely vessel-related targets while reducing small speckle artefacts and overly large non-ship reflections.
-
-The third stage integrates these outputs into the interactive Earth Engine application. Users can switch between months, regions, orbit directions, and polarisation bands to compare spatial and temporal patterns. Because the detection workflow is based on filtered VV backscatter, the ship candidate layer and density heatmap are only available in VV mode. Supporting statistics and fixed monthly charts are displayed alongside the map to provide additional context for interpreting relative activity levels across the port.
 
 ```javascript
 function detectShips(image, threshold, minPixels, maxPixels) {
@@ -147,7 +154,9 @@ function detectShips(image, threshold, minPixels, maxPixels) {
 var shipMask = detectShips(detectionComposite, -10, 2, 15);
 ```
 
-The resulting ship candidate mask is then integrated into the interactive Earth Engine dashboard. Users can change month, orbit direction, and band, and the application updates the displayed SAR composite and detection layers accordingly. Because the detection workflow is based on filtered VV backscatter, ship candidate layers are displayed in VV mode only.
+### 3. App Integration and Visualisation
+
+The third stage integrates the detection output into the interactive Earth Engine application. Users can switch between months, regions, orbit directions, and polarisation bands to compare spatial and temporal patterns. Because the detection workflow is based on filtered VV backscatter, the ship candidate layer and density heatmap are only available in VV mode. Supporting statistics and fixed monthly charts are displayed alongside the map to provide additional context for interpreting relative activity levels across the port.
 
 ```javascript
 function updateMap() {
@@ -160,3 +169,10 @@ function updateMap() {
   }
 }
 ```
+
+### 4. Interpretation and Limitations
+
+The resulting ship candidate layer should be interpreted as an approximate indicator of maritime activity rather than a validated vessel inventory. It has not been validated against AIS or manually labelled vessel data, and some false positives may still remain in complex near-shore environments. For this reason, the app is designed to support exploratory visual analysis and relative comparison across space and time, rather than exact vessel counting.
+
+
+## References
