@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Singapore Shipping Activity Dashboard</title>
+<title>Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1 – Singapore Shipping Activity Dashboard</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -55,7 +58,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -71,10 +93,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-9f30c2c2d2429ed22c1cf9f617479b3b.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e19f81c97bc45f6835df6be9cce9fdc9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e3866b3096280c29da058bbe07245a78.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-443b18794f898080e8990b9a709c93f1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -119,9 +141,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1" id="toc-interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1" class="nav-link active" data-scroll-target="#interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1">Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1</a>
-  <ul class="collapse">
-  <li><a href="#project-summary" id="toc-project-summary" class="nav-link" data-scroll-target="#project-summary">Project Summary</a>
+  <li><a href="#project-summary" id="toc-project-summary" class="nav-link active" data-scroll-target="#project-summary">Project Summary</a>
   <ul class="collapse">
   <li><a href="#problem-statement" id="toc-problem-statement" class="nav-link" data-scroll-target="#problem-statement">Problem Statement</a></li>
   <li><a href="#end-user" id="toc-end-user" class="nav-link" data-scroll-target="#end-user">End User</a></li>
@@ -143,19 +163,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#method-and-limitations" id="toc-method-and-limitations" class="nav-link" data-scroll-target="#method-and-limitations">Method and Limitations</a></li>
   </ul></li>
-  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it Works</a></li>
+  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it Works</a>
+  <ul class="collapse">
+  <li><a href="#preprocessing" id="toc-preprocessing" class="nav-link" data-scroll-target="#preprocessing">1. Preprocessing</a></li>
+  <li><a href="#ship-candidate-detection" id="toc-ship-candidate-detection" class="nav-link" data-scroll-target="#ship-candidate-detection">2. Ship Candidate Detection</a></li>
+  <li><a href="#app-integration-and-visualisation" id="toc-app-integration-and-visualisation" class="nav-link" data-scroll-target="#app-integration-and-visualisation">3. App Integration and Visualisation</a></li>
+  <li><a href="#interpretation-and-limitations" id="toc-interpretation-and-limitations" class="nav-link" data-scroll-target="#interpretation-and-limitations">4. Interpretation and Limitations</a></li>
   </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1</h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
 
-<section id="interactive-analysis-of-maritime-activity-in-the-port-of-singapore-using-sentinel-1" class="level1">
-<h1>Interactive Analysis of Maritime Activity in the Port of Singapore Using Sentinel-1</h1>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <section id="project-summary" class="level2">
 <h2 class="anchored" data-anchor-id="project-summary">Project Summary</h2>
 <section id="problem-statement" class="level3">
@@ -168,14 +208,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="data" class="level3">
 <h3 class="anchored" data-anchor-id="data">Data</h3>
-<p>The project uses Sentinel-1 GRD data from Google Earth Engine. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.</p>
+<p>The project uses Sentinel-1 GRD data from Google Earth Engine <span class="citation" data-cites="gee_s1_grd">(<a href="#ref-gee_s1_grd" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-c</a>)</span>. Sentinel-1 is a Synthetic Aperture Radar (SAR) dataset that provides day-and-night, all-weather observations. We focus on the Port of Singapore and surrounding waters, filtering images from 2023-01-01 to 2023-12-31. The selected images use IW mode and include both VV and VH polarisations.</p>
 <p>A total of <strong>109 Sentinel-1 images</strong> were identified for the study area across 2023, comprising 61 ascending and 48 descending orbit passes. Monthly image counts were calculated to confirm temporal data availability, and the results show relatively stable coverage throughout the year.</p>
 <p><img src="images/monthly_image_count.png" class="img-fluid"></p>
 <p>Figure: Monthly Sentinel-1 image count in the study area for 2023.</p>
 </section>
 <section id="why-sentinel-1" class="level3">
 <h3 class="anchored" data-anchor-id="why-sentinel-1">Why Sentinel-1?</h3>
-<p>Sentinel-1 was selected because SAR imagery is particularly suitable for maritime monitoring. Unlike optical imagery, it is unaffected by cloud cover and lighting conditions, making it well suited to busy coastal and port environments. The VV polarisation channel is sensitive to surface roughness and large metallic structures such as ship hulls, while VH captures volume scattering and can help distinguish between vessel types and background clutter.</p>
+<p>Sentinel-1 was selected because SAR imagery is particularly suitable for maritime monitoring. Unlike optical imagery, it is unaffected by cloud cover and lighting conditions, making it well suited to busy coastal and port environments <span class="citation" data-cites="esa_sentinel1 gee_s1_grd">(<a href="#ref-esa_sentinel1" role="doc-biblioref">European Space Agency, n.d.</a>; <a href="#ref-gee_s1_grd" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-c</a>)</span>. The VV polarisation channel is sensitive to surface roughness and large metallic structures such as ship hulls, while VH captures volume scattering and can help distinguish between vessel types and background clutter.</p>
 </section>
 <section id="limitations" class="level3">
 <h3 class="anchored" data-anchor-id="limitations">Limitations</h3>
@@ -210,8 +250,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="stage-3-water-and-land-masking" class="level3">
 <h3 class="anchored" data-anchor-id="stage-3-water-and-land-masking">Stage 3: Water and Land Masking</h3>
 <p>To focus analysis on open water and suppress land-related backscatter, two masking steps were applied:</p>
-<p><strong>Water mask:</strong> The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.</p>
-<p><strong>Near-shore buffer:</strong> Coastal and near-shore areas produce complex mixed signals where land and water backscatter overlap, leading to high rates of false vessel detections. A 500-metre exclusion buffer was applied around all land boundaries using the USDOS LSIB simplified coastline dataset. Pixels within this buffer zone were removed from the clean output layer.</p>
+<p><strong>Water mask:</strong> The JRC Global Surface Water dataset (occurrence layer) was used to identify pixels with greater than 50% historical water occurrence <span class="citation" data-cites="gee_jrc_gsw pekel2016surface">(<a href="#ref-gee_jrc_gsw" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-a</a>; <a href="#ref-pekel2016surface" role="doc-biblioref">Pekel et al. 2016</a>)</span>. Only these pixels were retained for further analysis, effectively removing land and built-up areas from the image.</p>
+<p><strong>Near-shore buffer:</strong> Coastal and near-shore areas produce complex mixed signals where land and water backscatter overlap, leading to high rates of false vessel detections. A 500-metre exclusion buffer was applied around all land boundaries using the USDOS LSIB simplified coastline dataset <span class="citation" data-cites="gee_lsib_simple">(<a href="#ref-gee_lsib_simple" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-b</a>)</span>. Pixels within this buffer zone were removed from the clean output layer.</p>
 </section>
 <section id="stage-4-ship-candidate-detection" class="level3">
 <h3 class="anchored" data-anchor-id="stage-4-ship-candidate-detection">Stage 4: Ship Candidate Detection</h3>
@@ -254,7 +294,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </iframe>
 <section id="method-and-limitations" class="level3">
 <h3 class="anchored" data-anchor-id="method-and-limitations">Method and Limitations</h3>
-<p>Detection uses filtered VV greater than -10 dB, connected groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.</p>
+<p>Detection uses filtered VV backscatter greater than -10 dB, connected-pixel groups between 2 and 15 pixels, a water mask, and a 500 m near-shore exclusion buffer.</p>
 <p>The orange layer shows ship candidates rather than AIS-validated vessels. Strong port infrastructure, near-shore clutter, and fixed thresholds can still create false positives or missed small vessels. Candidate pixels and density sums should therefore be interpreted as relative indicators of maritime activity, not validated vessel counts.</p>
 <p>The VH layer is useful for visual comparison of backscatter, but the ship candidate and density heatmap layers are derived from VV. For this reason, the dashboard disables those detection-based layers when VH is selected.</p>
 </section>
@@ -264,10 +304,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The application combines SAR preprocessing, rule-based ship candidate detection, and interface-based visual exploration to support interpretation of maritime activity in the Port of Singapore. Its design follows a staged workflow in which raw Sentinel-1 imagery is progressively transformed into interactive map layers, summary statistics, and temporal charts.</p>
 <p><img src="images/flowchart.png" class="img-fluid"></p>
 <p>Figure: Workflow of the application, from Sentinel-1 preprocessing to ship candidate detection and interactive visualisation.</p>
-<p>The first stage prepares the input imagery. Sentinel-1 GRD scenes are filtered to the 2023 study period and the Port of Singapore study area. Because SAR imagery is affected by speckle noise, a 3×3 focal mean filter is applied to smooth local variation while preserving larger spatial structures. The workflow then uses the JRC Global Surface Water dataset to retain open-water pixels and applies a 500 m near-shore exclusion buffer to reduce mixed land–water backscatter and strong coastal clutter. This preprocessing stage creates a cleaner radar surface for subsequent ship candidate extraction.</p>
+<section id="preprocessing" class="level3">
+<h3 class="anchored" data-anchor-id="preprocessing">1. Preprocessing</h3>
+<p>The first stage prepares the input imagery. Sentinel-1 GRD scenes are filtered to the 2023 study period and the Port of Singapore study area. Because SAR imagery is affected by speckle noise, a 3×3 focal mean filter is applied to smooth local variation while preserving larger spatial structures. The workflow then uses the JRC Global Surface Water dataset to retain open-water pixels and applies a 500 m near-shore exclusion buffer to reduce mixed land–water backscatter and strong coastal clutter. This preprocessing stage creates a cleaner radar surface for subsequent ship candidate extraction and follows the use of Earth Engine catalogue datasets for Sentinel-1 handling, water masking, and coastal exclusion <span class="citation" data-cites="gee_s1_guide gee_jrc_gsw gee_lsib_simple">(<a href="#ref-gee_s1_guide" role="doc-biblioref">Google Earth Engine, n.d.</a>; <a href="#ref-gee_jrc_gsw" role="doc-biblioref">Google Earth Engine Data Catalog, n.d.-a</a>, <a href="#ref-gee_lsib_simple" role="doc-biblioref">n.d.-b</a>)</span>.</p>
+</section>
+<section id="ship-candidate-detection" class="level3">
+<h3 class="anchored" data-anchor-id="ship-candidate-detection">2. Ship Candidate Detection</h3>
 <p>The second stage identifies ship candidates from the filtered VV backscatter layer. Bright radar returns above a selected threshold are interpreted as potential vessel targets. However, thresholding alone produces many isolated noisy detections, so connected-pixel filtering is used to retain only groups of pixels within a defined size range. In the final configuration, detections are derived using a threshold of <strong>-10 dB</strong>, a minimum connected-pixel size of <strong>2</strong>, and a maximum of <strong>15</strong>. This produces a ship candidate mask that highlights likely vessel-related targets while reducing small speckle artefacts and overly large non-ship reflections.</p>
-<p>The third stage integrates these outputs into the interactive Earth Engine application. Users can switch between months, regions, orbit directions, and polarisation bands to compare spatial and temporal patterns. Because the detection workflow is based on filtered VV backscatter, the ship candidate layer and density heatmap are only available in VV mode. Supporting statistics and fixed monthly charts are displayed alongside the map to provide additional context for interpreting relative activity levels across the port.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">detectShips</span>(image<span class="op">,</span> threshold<span class="op">,</span> minPixels<span class="op">,</span> maxPixels) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">detectShips</span>(image<span class="op">,</span> threshold<span class="op">,</span> minPixels<span class="op">,</span> maxPixels) {</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> brightTargets <span class="op">=</span> image<span class="op">.</span><span class="fu">select</span>(<span class="st">'VV_filtered'</span>)<span class="op">.</span><span class="fu">gt</span>(threshold)<span class="op">;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> connected <span class="op">=</span> brightTargets<span class="op">.</span><span class="fu">connectedPixelCount</span>(<span class="dv">100</span><span class="op">,</span> <span class="kw">true</span>)<span class="op">;</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> filtered <span class="op">=</span> brightTargets</span>
@@ -276,9 +320,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> filtered<span class="op">.</span><span class="fu">selfMask</span>()<span class="op">;</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> shipMask <span class="op">=</span> <span class="fu">detectShips</span>(detectionComposite<span class="op">,</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">15</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The resulting ship candidate mask is then integrated into the interactive Earth Engine dashboard. Users can change month, orbit direction, and band, and the application updates the displayed SAR composite and detection layers accordingly. Because the detection workflow is based on filtered VV backscatter, ship candidate layers are displayed in VV mode only.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">updateMap</span>() {</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> shipMask <span class="op">=</span> <span class="fu">detectShips</span>(detectionComposite<span class="op">,</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">15</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="app-integration-and-visualisation" class="level3">
+<h3 class="anchored" data-anchor-id="app-integration-and-visualisation">3. App Integration and Visualisation</h3>
+<p>The third stage integrates the detection output into the interactive Earth Engine application. Users can switch between months, regions, orbit directions, and polarisation bands to compare spatial and temporal patterns. Because the detection workflow is based on filtered VV backscatter, the ship candidate layer and density heatmap are only available in VV mode. Supporting statistics and fixed monthly charts are displayed alongside the map to provide additional context for interpreting relative activity levels across the port.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">updateMap</span>() {</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">var</span> composite <span class="op">=</span> <span class="fu">getComposite</span>(currentMonth<span class="op">,</span> currentOrbit)<span class="op">;</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">Map</span><span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">0</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(composite<span class="op">,</span> sarVis<span class="op">,</span> <span class="st">'SAR Composite'</span>))<span class="op">;</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -286,14 +333,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> shipMask <span class="op">=</span> <span class="fu">detectShips</span>(composite<span class="op">,</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">15</span>)<span class="op">;</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Map</span><span class="op">.</span><span class="fu">layers</span>()<span class="op">.</span><span class="fu">set</span>(<span class="dv">1</span><span class="op">,</span> ui<span class="op">.</span><span class="at">Map</span><span class="op">.</span><span class="fu">Layer</span>(shipMask<span class="op">,</span> {<span class="dt">palette</span><span class="op">:</span> [<span class="st">'FF6600'</span>]}<span class="op">,</span> <span class="st">'Ship Candidates'</span>))<span class="op">;</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretation-and-limitations" class="level3">
+<h3 class="anchored" data-anchor-id="interpretation-and-limitations">4. Interpretation and Limitations</h3>
+<p>The resulting ship candidate layer should be interpreted as an approximate indicator of maritime activity rather than a validated vessel inventory. It has not been validated against AIS or manually labelled vessel data, and some false positives may still remain in complex near-shore environments. For this reason, the app is designed to support exploratory visual analysis and relative comparison across space and time, rather than exact vessel counting.</p>
+</section>
+</section>
+<section id="references" class="level2">
+
+
 
 
 </section>
-</section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-esa_sentinel1" class="csl-entry" role="listitem">
+European Space Agency. n.d. <em>Sentinel-1</em>.
+</div>
+<div id="ref-gee_s1_guide" class="csl-entry" role="listitem">
+Google Earth Engine. n.d. <em>Sentinel-1 Algorithms</em>.
+</div>
+<div id="ref-gee_jrc_gsw" class="csl-entry" role="listitem">
+Google Earth Engine Data Catalog. n.d.-a. <em>JRC Global Surface Water Mapping Layers, V1.4</em>.
+</div>
+<div id="ref-gee_lsib_simple" class="csl-entry" role="listitem">
+Google Earth Engine Data Catalog. n.d.-b. <em>LSIB 2017: Large Scale International Boundary Polygons, Simplified</em>.
+</div>
+<div id="ref-gee_s1_grd" class="csl-entry" role="listitem">
+Google Earth Engine Data Catalog. n.d.-c. <em>Sentinel-1 SAR GRD: C-Band Synthetic Aperture Radar Ground Range Detected</em>.
+</div>
+<div id="ref-pekel2016surface" class="csl-entry" role="listitem">
+Pekel, Jean-François, Andrew Cottam, Noel Gorelick, and Alan S. Belward. 2016. <span>“High-Resolution Mapping of Global Surface Water and Its Long-Term Changes.”</span> <em>Nature</em> 540 (7633): 418–22. <a href="https://www.nature.com/articles/nature20584">https://www.nature.com/articles/nature20584</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script src="toc-active.js"></script>
+
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -345,13 +420,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
