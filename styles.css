@@ -380,3 +380,30 @@ a {
     transform: none;
   }
 }
+
+/* Make the bibliography match the main page styling */
+#refs {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-top: 1.2rem !important;
+}
+
+.csl-bib-body {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.csl-entry {
+  background: transparent !important;
+  margin-bottom: 0.85rem;
+  padding: 0 !important;
+}
+
+#refs p,
+#refs div,
+#refs li {
+  background: transparent !important;
+}
